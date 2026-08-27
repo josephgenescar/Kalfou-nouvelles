@@ -26,8 +26,17 @@ create table if not exists public.publicity (
   email text not null,
   type text not null,
   message text not null,
+  image_url text,
+  status text not null default 'pending' check (status in ('pending', 'published', 'rejected')),
   created_at timestamptz not null default now()
 );
+
+alter table public.publicity add column if not exists image_url text;
+alter table public.publicity add column if not exists status text not null default 'pending';
+
+insert into storage.buckets (id, name, public)
+values ('publicity-images', 'publicity-images', true)
+on conflict (id) do nothing;
 
 alter table public.articles enable row level security;
 alter table public.contacts enable row level security;
@@ -52,3 +61,13 @@ create policy "Anyone can request publicity"
 on public.publicity for insert
 to anon, authenticated
 with check (true);
+
+create policy "Published publicity is public"
+on public.publicity for select
+to anon, authenticated
+using (status = 'published');
+
+create policy "Publicity images are publicly readable"
+on storage.objects for select
+to anon, authenticated
+using (bucket_id = 'publicity-images');

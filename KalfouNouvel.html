@@ -118,6 +118,11 @@
       .brand {
         line-height: 1;
       }
+      .site-logo {
+        display: block;
+        width: min(270px, 62vw);
+        height: auto;
+      }
       .brand-text {
         font-size: clamp(30px, 4vw, 52px);
         font-weight: 900;
@@ -573,6 +578,25 @@
         gap: 12px;
         flex-wrap: wrap;
       }
+      .publicity-live {
+        display: none;
+        margin-top: 30px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+      }
+      .publicity-live img {
+        display: block;
+        width: 100%;
+        max-height: 230px;
+        object-fit: cover;
+      }
+      .publicity-live-copy { padding: 16px 18px; }
+      .publicity-live-copy strong {
+        color: var(--red);
+        font-size: 11px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
       .primary-btn,
       .secondary-btn {
         border: none;
@@ -644,6 +668,11 @@
         color: var(--paper);
       }
       .footer-brand span { color: var(--red); }
+      .footer-logo {
+        display: block;
+        width: 170px;
+        height: auto;
+      }
       .footer-tag {
         margin-top: 8px;
         font-size: 11px;
@@ -763,7 +792,7 @@
     <header>
       <div class="container header-inner">
         <div class="brand">
-          <div class="brand-text">KALFOU <span>NOUVELLES</span></div>
+          <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
           <div class="brand-tag" data-i18n="tagline">Actualités • Analyse • Opinion</div>
         </div>
         <button class="menu-toggle" type="button" aria-expanded="false">Menu</button>
@@ -980,11 +1009,19 @@
           </form>
         </section>
       </div>
+        <section id="publicityLive" class="publicity-live" aria-label="Publicité">
+          <div id="publicityLiveImage"></div>
+          <div class="publicity-live-copy">
+            <strong>Publicité</strong>
+            <h2 id="publicityLiveTitle"></h2>
+            <p id="publicityLiveText"></p>
+          </div>
+        </section>
     </main>
 
     <footer>
       <div class="container">
-        <div class="footer-brand">KALFOU <span>NOUVELLES</span></div>
+        <img class="footer-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
         <div class="footer-tag" data-i18n="footer_tag">Actualités Haïti • Journalisme simple et fiable</div>
 
         <div class="footer-grid">
@@ -1258,6 +1295,30 @@
         });
       }
 
+      async function loadPublishedPublicity() {
+        try {
+          const response = await fetch('/api/public/publicity');
+          if (!response.ok) return;
+          const result = await response.json();
+          const campaign = result.publicity?.find((item) => item.image_url || item.imageUrl);
+          if (!campaign) return;
+
+          const section = document.getElementById('publicityLive');
+          const image = document.getElementById('publicityLiveImage');
+          const title = document.getElementById('publicityLiveTitle');
+          const text = document.getElementById('publicityLiveText');
+          if (!section || !image || !title || !text) return;
+          const imageUrl = campaign.image_url || campaign.imageUrl;
+          const safeUrl = encodeURI(imageUrl);
+          image.innerHTML = `<img src="${safeUrl}" alt="Publicité de ${campaign.company || 'notre partenaire'}" />`;
+          title.textContent = campaign.company || 'Notre partenaire';
+          text.textContent = campaign.message || '';
+          section.style.display = 'block';
+        } catch (error) {
+          console.error('Unable to load published publicity:', error);
+        }
+      }
+
       async function loadPublishedArticles() {
         try {
           const response = await fetch('/api/public/articles');
@@ -1371,6 +1432,7 @@
 
       updateLanguage('fr');
       loadPublishedArticles();
+      loadPublishedPublicity();
     </script>
   </body>
 </html>

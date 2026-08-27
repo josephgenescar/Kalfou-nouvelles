@@ -52,6 +52,7 @@
         letter-spacing: -1px;
         font-size: clamp(28px, 4vw, 44px);
       }
+      .site-logo { display: block; width: min(230px, 58vw); height: auto; }
       .brand span { color: var(--red); }
       .nav {
         display: flex;
@@ -193,7 +194,7 @@
         </div>
       </div>
       <div class="container nav-wrap">
-        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
         <nav class="nav">
           <a href="KalfouNouvel.html">Accueil</a>
           <a href="soumettre.html">Soumettre</a>
@@ -307,7 +308,7 @@
 
     <footer>
       <div class="container footer-inner">
-        <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" style="width:150px;" />
         <div>© 2026 Kalfou Nouvelles</div>
       </div>
     </footer>
@@ -446,7 +447,11 @@
             <td>${escapeHtml(item.type)}</td>
             <td>${escapeHtml(item.message)}</td>
             <td>${escapeHtml(formatDate(item.createdAt))}</td>
-            <td><button class="mini-btn danger" data-action="delete-publicity" data-id="${item.id}">Supprimer</button></td>
+              <td>
+                ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir image</a><br />` : ''}
+                <button class="mini-btn primary" data-action="toggle-publicity" data-id="${item.id}">${item.status === 'published' ? 'Retirer' : 'Publier'}</button>
+                <button class="mini-btn danger" data-action="delete-publicity" data-id="${item.id}">Supprimer</button>
+              </td>
           </tr>
         `).join('');
       }
@@ -530,6 +535,12 @@
 
           if (action === 'delete-publicity') {
             await callAdminAction(`/api/admin/publicity/${id}/delete`, {});
+          }
+
+          if (action === 'toggle-publicity') {
+            const publicity = (state.data.publicity || []).find((item) => item.id === id);
+            const nextStatus = publicity && publicity.status === 'published' ? 'pending' : 'published';
+            await callAdminAction(`/api/admin/publicity/${id}/status`, { status: nextStatus });
           }
 
           await loadAdminData();

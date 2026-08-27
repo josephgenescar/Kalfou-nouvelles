@@ -3,17 +3,24 @@ const path = require('path');
 const fs = require('fs');
 const { randomUUID } = require('crypto');
 const cors = require('cors');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'publicity-images';
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => callback(null, /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype))
+});
 
 function requireSupabase(res) {
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
@@ -41,6 +48,23 @@ async function supabaseRequest(table, options = {}) {
     throw error;
   }
   return body;
+}
+
+async function uploadPublicityImage(file) {
+  const extension = file.originalname.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  const filePath = `${Date.now()}-${randomUUID()}.${extension}`;
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_STORAGE_BUCKET}/${filePath}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      'Content-Type': file.mimetype,
+      'x-upsert': 'false'
+    },
+    body: file.buffer
+  });
+  if (!response.ok) throw new Error('Imaj publicité a pa ka upload nan Supabase.');
+  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${filePath}`;
 }
 
 function mapArticle(row) {
@@ -162,17 +186,26 @@ app.post('/api/admin/articles', async (req, res) => {
   } catch (error) { handleServerError(res, error); }
 });
 
-app.post('/api/publicity', async (req, res) => {
+app.post('/api/publicity', upload.single('image'), async (req, res) => {
   const { companyName, company, email, type, message } = req.body || {};
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (!requireSupabase(res)) return;
   try {
+    const imageUrl = req.file ? await uploadPublicityImage(req.file) : null;
     await supabaseRequest('publicity', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim() })
+      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
     });
     res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
+  } catch (error) { handleServerError(res, error); }
+});
+
+app.get('/api/public/publicity', async (req, res) => {
+  if (!requireSupabase(res)) return;
+  try {
+    const rows = await supabaseRequest('publicity?select=*&status=eq.published&order=created_at.desc');
+    res.json({ ok: true, publicity: rows.map(mapPublicity) });
   } catch (error) { handleServerError(res, error); }
 });
 
@@ -226,6 +259,18 @@ app.post('/api/admin/articles/:id/status', async (req, res) => {
     const rows = await supabaseRequest(`articles?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
     if (!rows.length) return res.status(404).json({ ok: false, message: 'Article introuvable.' });
     res.json({ ok: true, article: mapArticle(rows[0]) });
+  } catch (error) { handleServerError(res, error); }
+});
+
+app.post('/api/admin/publicity/:id/status', async (req, res) => {
+  const { password, status } = req.body || {};
+  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  if (!['pending', 'published', 'rejected'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
+  if (!requireSupabase(res)) return;
+  try {
+    const rows = await supabaseRequest(`publicity?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
+    if (!rows.length) return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
+    res.json({ ok: true, publicity: mapPublicity(rows[0]) });
   } catch (error) { handleServerError(res, error); }
 });
 

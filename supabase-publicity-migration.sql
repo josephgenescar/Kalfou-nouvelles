@@ -1,6 +1,20 @@
 alter table public.publicity add column if not exists image_url text;
 alter table public.publicity add column if not exists status text not null default 'pending';
 
+create table if not exists public.newsletter_subscribers (
+	id uuid primary key default gen_random_uuid(),
+	email text unique not null,
+	created_at timestamptz not null default now()
+);
+
+alter table public.newsletter_subscribers enable row level security;
+
+drop policy if exists "Anyone can subscribe to newsletter" on public.newsletter_subscribers;
+create policy "Anyone can subscribe to newsletter"
+on public.newsletter_subscribers for insert
+to anon, authenticated
+with check (true);
+
 insert into storage.buckets (id, name, public)
 values ('publicity-images', 'publicity-images', true)
 on conflict (id) do nothing;

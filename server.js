@@ -11,6 +11,8 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'publicity-images';
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
@@ -198,6 +200,36 @@ app.post('/api/publicity', upload.single('image'), async (req, res) => {
       body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
     });
     res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
+  } catch (error) { handleServerError(res, error); }
+});
+
+app.post('/api/newsletter', async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return res.status(400).json({ ok: false, message: 'Veuillez entrer une adresse e-mail valide.' });
+  }
+  if (!requireSupabase(res)) return;
+  if (!BREVO_API_KEY || !BREVO_LIST_ID) {
+    return res.status(503).json({ ok: false, message: 'Newsletter pa konfigire sou backend lan.' });
+  }
+
+  try {
+    await supabaseRequest('newsletter_subscribers', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+      body: JSON.stringify({ email })
+    });
+
+    const brevoResponse = await fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: { accept: 'application/json', 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
+      body: JSON.stringify({ email, listIds: [Number(BREVO_LIST_ID)], updateEnabled: true })
+    });
+
+    if (!brevoResponse.ok && brevoResponse.status !== 204) {
+      throw new Error('Brevo subscription failed');
+    }
+    res.status(201).json({ ok: true, message: 'Inscription réussie. Vous recevrez nos prochaines informations.' });
   } catch (error) { handleServerError(res, error); }
 });
 

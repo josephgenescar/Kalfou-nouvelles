@@ -999,10 +999,11 @@
             <h3 data-i18n="newsletter_title">Recevez l’info chaque matin</h3>
             <p data-i18n="newsletter_subtitle">Un résumé clair, simple et utile, directement dans votre boîte mail.</p>
           </div>
-          <form class="newsletter-form">
-            <input type="email" data-placeholder="email" placeholder="Votre e-mail" />
+          <form class="newsletter-form" id="newsletterForm">
+            <input type="email" name="email" data-placeholder="email" placeholder="Votre e-mail" required />
             <button type="button" data-i18n="newsletter_button">S’inscrire</button>
           </form>
+          <p id="newsletterMessage" aria-live="polite"></p>
         </section>
       </div>
         <section id="publicityLive" class="publicity-live" aria-label="Publicité">
@@ -1426,6 +1427,30 @@
       document.querySelectorAll('.lang-btn').forEach((btn) => {
         btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
       });
+
+      const newsletterForm = document.getElementById('newsletterForm');
+      const newsletterMessage = document.getElementById('newsletterMessage');
+      newsletterForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const button = newsletterForm.querySelector('button');
+        button.disabled = true;
+        try {
+          const response = await fetch('/api/newsletter', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: new FormData(newsletterForm).get('email') })
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message || 'Inscription impossible.');
+          newsletterMessage.textContent = result.message;
+          newsletterForm.reset();
+        } catch (error) {
+          newsletterMessage.textContent = error.message;
+        } finally {
+          button.disabled = false;
+        }
+      });
+      newsletterForm?.querySelector('button')?.addEventListener('click', () => newsletterForm.requestSubmit());
 
       updateLanguage('fr');
       loadPublishedArticles();

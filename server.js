@@ -146,6 +146,22 @@ app.post('/api/articles', async (req, res) => {
   } catch (error) { handleServerError(res, error); }
 });
 
+app.post('/api/admin/articles', async (req, res) => {
+  const { password, author, email, title, category, summary, content, status } = req.body || {};
+  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
+  if (!['pending', 'published'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
+  if (!requireSupabase(res)) return;
+  try {
+    const rows = await supabaseRequest('articles', {
+      method: 'POST',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), status })
+    });
+    res.status(201).json({ ok: true, article: mapArticle(rows[0]), message: status === 'published' ? 'Article publié avec succès.' : 'Brouillon enregistré.' });
+  } catch (error) { handleServerError(res, error); }
+});
+
 app.post('/api/publicity', async (req, res) => {
   const { companyName, company, email, type, message } = req.body || {};
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });

@@ -229,6 +229,21 @@
         </div>
 
         <section class="panel">
+          <h2>Publier un article</h2>
+          <form id="ownerArticleForm">
+            <input name="author" value="Kalfou Nouvelles" required placeholder="Auteur" />
+            <input name="email" type="email" required placeholder="E-mail de rédaction" />
+            <input name="title" required placeholder="Titre de l’article" />
+            <input name="category" required placeholder="Catégorie" />
+            <textarea name="summary" required placeholder="Résumé"></textarea>
+            <textarea name="content" required placeholder="Contenu de l’article"></textarea>
+            <button class="mini-btn primary" type="submit">Publier maintenant</button>
+            <button class="mini-btn" type="button" id="saveDraftBtn">Enregistrer brouillon</button>
+          </form>
+          <p id="ownerArticleMessage" class="empty"></p>
+        </section>
+
+        <section class="panel">
           <h2>Soumissions d’articles</h2>
           <div id="articlesPanel" class="empty">Aucune soumission pour le moment.</div>
           <table id="articlesTable" style="display:none;">
@@ -298,7 +313,6 @@
     </footer>
 
     <script>
-      const ADMIN_PASSWORD = 'Kalfou2026';
       const authBox = document.getElementById('authBox');
       const adminContent = document.getElementById('adminContent');
       const unlockBtn = document.getElementById('unlockBtn');
@@ -333,6 +347,21 @@
         }
 
         return result;
+      }
+
+      async function createOwnerArticle(status) {
+        const form = document.getElementById('ownerArticleForm');
+        const message = document.getElementById('ownerArticleMessage');
+        const payload = Object.fromEntries(new FormData(form).entries());
+        payload.status = status;
+        try {
+          const result = await callAdminAction('/api/admin/articles', payload);
+          message.textContent = result.message;
+          form.reset();
+          await loadAdminData();
+        } catch (error) {
+          message.textContent = error.message;
+        }
       }
 
       function renderArticleRows(items) {
@@ -511,6 +540,11 @@
 
       document.addEventListener('click', handleAction);
       unlockBtn.addEventListener('click', unlockAdmin);
+      document.getElementById('ownerArticleForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        createOwnerArticle('published');
+      });
+      document.getElementById('saveDraftBtn').addEventListener('click', () => createOwnerArticle('pending'));
       adminPassword.addEventListener('keydown', function (event) {
         if (event.key === 'Enter') unlockAdmin();
       });

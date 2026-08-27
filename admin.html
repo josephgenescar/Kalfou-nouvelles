@@ -26,9 +26,6 @@
       a { color: inherit; text-decoration: none; }
       .container { width: min(1160px, calc(100% - 28px)); margin: 0 auto; }
       header {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
         background: var(--paper);
         border-bottom: 3px solid var(--red);
       }
@@ -165,6 +162,14 @@
       .mini-btn.danger {
         background: var(--red);
         color: #fff;
+      }
+      .publicity-preview {
+        display: block;
+        width: 120px;
+        height: 70px;
+        object-fit: cover;
+        margin-bottom: 8px;
+        border: 1px solid var(--line);
       }
       footer {
         background: #101010;
@@ -451,7 +456,7 @@
             <td>${escapeHtml(item.message)}</td>
             <td>${escapeHtml(formatDate(item.createdAt))}</td>
               <td>
-                ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener">Voir image</a><br />` : ''}
+                ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener"><img class="publicity-preview" src="${escapeHtml(item.image_url)}" alt="Image de la publicité" /></a>` : '<span class="empty">Sans image</span>'}
                 <button class="mini-btn primary" data-action="toggle-publicity" data-id="${item.id}">${item.status === 'published' ? 'Retirer' : 'Publier'}</button>
                 <button class="mini-btn danger" data-action="delete-publicity" data-id="${item.id}">Supprimer</button>
               </td>

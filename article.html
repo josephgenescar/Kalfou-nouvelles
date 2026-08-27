@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Article | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #181818;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+        --gold: #d7a516;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.7;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { width: min(1000px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #111111;
+        color: #d9d9d9;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .nav a { color: #2d2d2d; }
+      .nav a:hover { color: var(--red); }
+      main {
+        padding: 36px 0 60px;
+      }
+      .article-shell {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 28px;
+      }
+      .tag {
+        display: inline-block;
+        background: var(--red);
+        color: white;
+        font-size: 11px;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        padding: 7px 12px;
+        margin-bottom: 18px;
+      }
+      h1 {
+        margin: 0 0 18px;
+        font-size: clamp(30px, 4vw, 46px);
+        line-height: 1.1;
+      }
+      .meta {
+        color: var(--muted);
+        font-size: 12px;
+        margin-bottom: 24px;
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 12px 0;
+      }
+      .hero-image {
+        height: 360px;
+        background-image: url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80');
+        background-size: cover;
+        background-position: center;
+        margin-bottom: 24px;
+      }
+      .article-body p {
+        margin: 0 0 18px;
+        color: #252525;
+        font-size: 17px;
+      }
+      .sidebar {
+        margin-top: 26px;
+        display: grid;
+        grid-template-columns: 1.3fr 0.7fr;
+        gap: 22px;
+      }
+      .related, .quote-box {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 18px;
+      }
+      .related h3, .quote-box h3 {
+        margin: 0 0 14px;
+        font-size: 14px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .related-list {
+        display: grid;
+        gap: 12px;
+      }
+      .related-item {
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--line);
+      }
+      .related-item:last-child { border-bottom: none; }
+      .related-item h4 {
+        margin: 0 0 4px;
+        font-size: 18px;
+      }
+      .quote-box {
+        background: var(--paper);
+      }
+      .quote-box p {
+        font-size: 18px;
+        margin: 0;
+        line-height: 1.5;
+      }
+      footer {
+        background: #101010;
+        color: #d7d7d7;
+        padding: 28px 0 22px;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 760px) {
+        .sidebar {
+          grid-template-columns: 1fr;
+        }
+        .nav-wrap,
+        .topbar-inner,
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="article.html">Politique</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <article class="article-shell">
+          <div class="tag">Politique • Analyse</div>
+          <h1>La crise politique de Haïti met à rude épreuve l’avenir du pays</h1>
+          <div class="meta">Par Marie-Claire Estimé • 18 août 2026 • 8 min de lecture</div>
+          <div class="hero-image"></div>
+
+          <div class="article-body">
+            <p>Alors que les institutions restent fragiles, la question de la gouvernance et de la confiance nationale revient au centre du débat. Les citoyens réclament plus de clarté, plus de justice et surtout des réponses concrètes à des problèmes qui s’accumulent depuis plusieurs mois.</p>
+            <p>Le pays se trouve dans une période de tension où chaque décision publique est vue à travers le prisme de l’urgence sociale. Les enjeux sont multiples : sécurité, économie, éducation, santé, accès à l’eau, stabilité institutionnelle. À ce rythme, l’absence de perspective claire devient elle-même un facteur de fatigue.</p>
+            <p>Les responsables politiques doivent aujourd’hui choisir entre discours rassurants et transformations profondes. Car si le pays continue d’attendre sans avancer, la crise ne sera plus seulement politique, elle deviendra structurelle.</p>
+            <p>Les citoyens ne demandent pas seulement des promesses. Ils veulent des institutions capables de rassurer, de répondre et de protéger. C’est dans ce cadre qu’une véritable refonte du débat public devient nécessaire : plus d’échanges de slogans, plus de décisions à court terme, et davantage de cohérence entre les paroles et les actes.</p>
+            <p>Haïti a besoin de sérieux, de stabilité et de vision. L’avenir ne dépend pas seulement de ceux qui gouvernent, mais aussi de la capacité de tout le pays à reconstruire un cadre de confiance commun.</p>
+          </div>
+        </article>
+
+        <div class="sidebar">
+          <div class="related">
+            <h3>À lire aussi</h3>
+            <div class="related-list">
+              <div class="related-item">
+                <h4>Le dollar continue d’influencer chaque achat du quotidien</h4>
+              </div>
+              <div class="related-item">
+                <h4>L’agriculture locale reçoit un nouvel appui technologique</h4>
+              </div>
+              <div class="related-item">
+                <h4>La diaspora crée des réseaux de solidarité économique</h4>
+              </div>
+            </div>
+          </div>
+
+          <div class="quote-box">
+            <h3>Analyse</h3>
+            <p>« La stabilité d’un pays se construit avec des décisions courageuses et une confiance durable. »</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>
+          <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        </div>
+        <div>© 2026 Kalfou Nouvelles</div>
+        <a href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20vous%20contacter." target="_blank" rel="noopener" style="color:#25d366; font-weight:700;">WhatsApp</a>
+      </div>
+    </footer>
+
+    <script>
+      function formatDisplayDate(value) {
+        if (!value) return 'Aujourd’hui';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Aujourd’hui';
+        return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      function renderArticle(article) {
+        if (!article) return;
+
+        const tag = document.querySelector('.tag');
+        const title = document.querySelector('.article-shell h1');
+        const meta = document.querySelector('.meta');
+        const hero = document.querySelector('.hero-image');
+        const body = document.querySelector('.article-body');
+        const relatedList = document.querySelector('.related-list');
+        const quote = document.querySelector('.quote-box p');
+
+        if (tag) tag.textContent = `${article.category || 'Actualité'} • Analyse`;
+        if (title) title.textContent = article.title;
+        if (meta) meta.textContent = `Par ${article.author || 'Rédaction'} • ${formatDisplayDate(article.createdAt)} • ${article.category || 'Actualité'}`;
+        if (hero) {
+          hero.style.backgroundImage = "linear-gradient(135deg, rgba(17,17,17,0.28), rgba(17,17,17,0.12)), url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80')";
+        }
+
+        if (body) {
+          const paragraphs = (article.content || article.summary || '').split(/\n+/).filter(Boolean);
+          body.innerHTML = paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join('');
+        }
+
+        if (quote) {
+          quote.textContent = article.summary || 'La vérité, les voix et les idées ont besoin d’un espace.';
+        }
+      }
+
+      async function loadArticle() {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
+
+        try {
+          let url = '/api/public/articles';
+          if (id) {
+            url = `/api/public/articles/${encodeURIComponent(id)}`;
+          }
+
+          const response = await fetch(url);
+          const result = await response.json();
+
+          if (!response.ok || !result.article) {
+            const fallback = await fetch('/api/public/articles');
+            const fallbackResult = await fallback.json();
+            if (fallbackResult.articles && fallbackResult.articles.length) {
+              renderArticle(fallbackResult.articles[0]);
+              return;
+            }
+            return;
+          }
+
+          renderArticle(result.article);
+
+          const relatedResponse = await fetch('/api/public/articles');
+          const relatedResult = await relatedResponse.json();
+          const relatedList = document.querySelector('.related-list');
+          if (relatedList && relatedResult.articles) {
+            const otherArticles = relatedResult.articles.filter((item) => item.id !== result.article.id).slice(0, 3);
+            relatedList.innerHTML = otherArticles.map((article) => `
+              <div class="related-item">
+                <h4><a href="article.html?id=${encodeURIComponent(article.id)}">${article.title}</a></h4>
+              </div>
+            `).join('');
+          }
+        } catch (error) {
+          console.error('Chargement article impossible:', error);
+        }
+      }
+
+      loadArticle();
+    </script>
+  </body>
+</html>

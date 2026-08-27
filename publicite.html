@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Publicité | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #181818;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+        --gold: #d7a516;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.7;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { width: min(1100px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #111111;
+        color: #d9d9d9;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .nav a { color: #2d2d2d; }
+      .nav a:hover { color: var(--red); }
+      main { padding: 36px 0 60px; }
+      .hero {
+        background: linear-gradient(135deg, #111111, #1a4f9d);
+        color: var(--paper);
+        padding: 24px;
+        margin-bottom: 26px;
+      }
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: clamp(32px, 4vw, 50px);
+        line-height: 1.1;
+      }
+      .hero p {
+        margin: 0;
+        color: #dfe9ff;
+        font-size: 17px;
+      }
+      .pricing {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 20px;
+        margin-bottom: 26px;
+      }
+      .plan {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 22px;
+      }
+      .plan.highlight {
+        border: 2px solid var(--red);
+        background: #fff6f6;
+      }
+      .plan h3 {
+        margin: 0 0 8px;
+        font-size: 24px;
+      }
+      .price {
+        font-size: 32px;
+        font-weight: 900;
+        margin-bottom: 12px;
+      }
+      .plan ul {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 20px;
+      }
+      .plan li {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+      }
+      .plan button,
+      .cta-link {
+        display: inline-block;
+        background: var(--red);
+        color: var(--paper);
+        padding: 12px 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .cta-link.alt {
+        background: var(--blue);
+      }
+      .form-wrap {
+        display: grid;
+        grid-template-columns: 1.1fr .9fr;
+        gap: 20px;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 22px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      label {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+      }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #faf8f5;
+        padding: 12px 14px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+      .side-box {
+        background: #faf7f4;
+        border: 1px solid var(--line);
+        padding: 20px;
+      }
+      .side-box h3 {
+        margin-top: 0;
+      }
+      .contact-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+      .contact-row a {
+        display: inline-block;
+        padding: 12px 18px;
+        background: #25d366;
+        color: white;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+      }
+      footer {
+        background: #101010;
+        color: #d7d7d7;
+        padding: 28px 0 22px;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 860px) {
+        .pricing,
+        .form-wrap {
+          grid-template-columns: 1fr;
+        }
+        .nav-wrap,
+        .topbar-inner,
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="article.html">Politique</a>
+          <a href="about.html">À propos</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <section class="hero">
+          <h1>Publicité & Partenariats</h1>
+          <p>Donnez à votre marque une visibilité claire, crédible et stratégique auprès d’un public engagé.</p>
+        </section>
+
+        <section class="pricing">
+          <article class="plan">
+            <h3>Starter</h3>
+            <div class="price">$150</div>
+            <ul>
+              <li>Banner homepage</li>
+              <li>1 semaine de visibilité</li>
+              <li>Réseaux sociaux mentionnés</li>
+              <li>Support de mise en ligne</li>
+            </ul>
+            <a class="cta-link" href="#contact-form">Choisir</a>
+          </article>
+
+          <article class="plan highlight">
+            <h3>Premium</h3>
+            <div class="price">$350</div>
+            <ul>
+              <li>Placement homepage + sidebar</li>
+              <li>Article sponsorisé</li>
+              <li>Newsletter promo</li>
+              <li>Suivi de campagne</li>
+            </ul>
+            <a class="cta-link alt" href="#contact-form">Choisir</a>
+          </article>
+
+          <article class="plan">
+            <h3>Partenariat</h3>
+            <div class="price">Sur devis</div>
+            <ul>
+              <li>Campagne multi-jours</li>
+              <li>Production éditoriale</li>
+              <li>Brand visibility</li>
+              <li>Stratégie de diffusion</li>
+            </ul>
+            <a class="cta-link" href="#contact-form">Choisir</a>
+          </article>
+        </section>
+
+        <section class="form-wrap" id="contact-form">
+          <div>
+            <h2 style="margin-top:0; font-size:32px;">Demander une campagne</h2>
+            <form id="publicityForm">
+              <div class="field">
+                <label for="companyName">Nom</label>
+                <input id="companyName" name="companyName" type="text" placeholder="Votre nom" required />
+              </div>
+              <div class="field">
+                <label for="company">Entreprise</label>
+                <input id="company" name="company" type="text" placeholder="Nom de votre entreprise" required />
+              </div>
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="votre@email.com" required />
+              </div>
+              <div class="field">
+                <label for="type">Type de partenariat</label>
+                <select id="type" name="type">
+                  <option>Banner</option>
+                  <option>Article sponsorisé</option>
+                  <option>Newsletter</option>
+                  <option>Partenariat global</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Décrivez votre besoin..." required></textarea>
+              </div>
+              <button type="submit" style="background: var(--red); color: white; border: none; padding: 12px 18px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; cursor: pointer;">Envoyer</button>
+              <div id="publicitySuccess" style="display:none; margin-top:16px; padding:12px 14px; background:#edf9f1; border:1px solid rgba(20,115,77,.25); color:#14734d; font-weight:700;">Votre demande a bien été enregistrée.</div>
+            </form>
+          </div>
+
+          <aside class="side-box">
+            <h3>Pourquoi Kalfou Nouvelles ?</h3>
+            <p>Notre média veille à une information claire, crédible et utile. Nous aidons les marques à trouver une audience engagée grâce à des placements simples, visibles et bien intégrés.</p>
+            <p>Nous proposons des solutions flexibles pour les entreprises, les institutions et les projets qui veulent gagner en visibilité.</p>
+
+            <div class="contact-row">
+              <a href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20discuter%20d'une%20publicite." target="_blank" rel="noopener">WhatsApp</a>
+              <a href="contact.html" class="cta-link alt" style="display:inline-block;">Contact</a>
+            </div>
+          </aside>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>
+          <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        </div>
+        <div>© 2026 Kalfou Nouvelles</div>
+      </div>
+    </footer>
+
+    <script>
+      const publicityForm = document.getElementById('publicityForm');
+      const publicitySuccess = document.getElementById('publicitySuccess');
+
+      publicityForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(publicityForm);
+        const payload = {
+          companyName: formData.get('companyName'),
+          company: formData.get('company'),
+          email: formData.get('email'),
+          type: formData.get('type'),
+          message: formData.get('message')
+        };
+
+        try {
+          const response = await fetch('/api/publicity', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || 'Erreur lors de l\'envoi.');
+          }
+
+          publicityForm.reset();
+          publicitySuccess.textContent = result.message || 'Votre demande a bien été enregistrée.';
+          publicitySuccess.style.display = 'block';
+        } catch (error) {
+          publicitySuccess.textContent = error.message;
+          publicitySuccess.style.display = 'block';
+          publicitySuccess.style.background = '#fff3f3';
+          publicitySuccess.style.borderColor = 'rgba(216,43,43,.25)';
+          publicitySuccess.style.color = '#a51d1d';
+        }
+      });
+    </script>
+  </body>
+</html>

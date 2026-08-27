@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Équipe | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #181818;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.7;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { width: min(1000px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #111111;
+        color: #d9d9d9;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .nav a { color: #2d2d2d; }
+      .nav a:hover { color: var(--red); }
+      main {
+        padding: 36px 0 60px;
+      }
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .member {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 18px;
+      }
+      .avatar {
+        height: 190px;
+        background: linear-gradient(135deg, #d9d9d9, #b3b3b3);
+        margin-bottom: 14px;
+        background-size: cover;
+        background-position: center;
+      }
+      .member h3 {
+        margin: 0 0 8px;
+        font-size: 22px;
+      }
+      .role {
+        color: var(--red);
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      .member p {
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+      footer {
+        background: #101010;
+        color: #d7d7d7;
+        padding: 28px 0 22px;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 760px) {
+        .team-grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-wrap,
+        .topbar-inner,
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="article.html">Politique</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="team-grid">
+          <div class="member">
+            <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="role">Rédaction</div>
+            <h3>Marie-Claire Estimé</h3>
+            <p>Journaliste politique et cheffe de rubrique, spécialisée dans les dossiers publics et les enjeux nationaux.</p>
+          </div>
+
+          <div class="member">
+            <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="role">Économie</div>
+            <h3>Jean-Robert Delva</h3>
+            <p>Reporter économique, il suit les dynamiques du marché, des prix, et des opportunités locales.</p>
+          </div>
+
+          <div class="member">
+            <div class="avatar" style="background-image:url('https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="role">Société</div>
+            <h3>Claudette Ménard</h3>
+            <p>Chargée des sujets sociaux, de la culture et des initiatives citoyennes qui changent les communautés.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>
+          <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        </div>
+        <div>© 2026 Kalfou Nouvelles</div>
+        <a href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20vous%20contacter." target="_blank" rel="noopener" style="color:#25d366; font-weight:700;">WhatsApp</a>
+      </div>
+    </footer>
+  </body>
+</html>

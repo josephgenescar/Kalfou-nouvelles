@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #171717;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --red-dark: #a71f1f;
+        --blue: #1a4f9d;
+        --gold: #d7a516;
+        --green: #14734d;
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(216, 43, 43, 0.06), transparent 30%),
+          linear-gradient(180deg, #f9f5f1 0%, var(--bg) 100%);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      a { color: inherit; text-decoration: none; }
+      img { display: block; max-width: 100%; }
+      button, input { font: inherit; }
+      .container { width: min(1120px, calc(100% - 28px)); margin: 0 auto; }
+      .card,
+      .hero-feature,
+      .side-column,
+      .analysis,
+      .opinion,
+      .newsletter,
+      .cta {
+        box-shadow: 0 8px 22px rgba(18, 18, 18, 0.04);
+      }
+      .hero-feature,
+      .side-column,
+      .card,
+      .analysis,
+      .opinion,
+      .newsletter,
+      .cta,
+      .feature-box {
+        border-radius: 0;
+      }
+
+      .topbar {
+        background: #101010;
+        color: #d6d6d6;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      .topbar-left {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      .lang-switch {
+        display: flex;
+        gap: 8px;
+      }
+      .lang-btn {
+        border: 1px solid rgba(255,255,255,.18);
+        background: transparent;
+        color: #f0f0f0;
+        padding: 6px 10px;
+        cursor: pointer;
+        font-weight: 700;
+        letter-spacing: .08em;
+      }
+      .lang-btn.active {
+        background: var(--red);
+        border-color: var(--red);
+      }
+
+      header {
+        background: rgba(255,255,255,0.96);
+        border-bottom: 3px solid var(--red);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: blur(8px);
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .menu-toggle {
+        display: none;
+        border: 1px solid var(--line);
+        background: transparent;
+        color: var(--ink);
+        padding: 10px 12px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .brand {
+        line-height: 1;
+      }
+      .brand-text {
+        font-size: clamp(30px, 4vw, 52px);
+        font-weight: 900;
+        letter-spacing: -1px;
+        text-transform: uppercase;
+      }
+      .brand-text span { color: var(--red); }
+      .brand-tag {
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+      }
+      .search-box {
+        width: min(330px, 100%);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        background: #faf7f4;
+        padding: 9px 12px;
+        border-radius: 999px;
+      }
+      .search-box input {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        color: var(--ink);
+      }
+      .search-box input::placeholder { color: #7a7a7a; }
+
+      nav {
+        background: #111111;
+      }
+      .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 22px;
+        padding: 12px 0;
+      }
+      .nav-inner a {
+        transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      }
+      .nav-inner.open {
+        display: flex;
+      }
+      .nav-inner a {
+        color: #d9d9d9;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        font-weight: 700;
+        padding: 4px 0 6px;
+        border-bottom: 2px solid transparent;
+        transition: color .2s ease, border-color .2s ease;
+      }
+      .nav-inner a:hover,
+      .nav-inner a.active {
+        color: white;
+        border-color: var(--red);
+      }
+      .nav-inner a:hover {
+        transform: translateY(-1px);
+      }
+
+      .ticker {
+        background: var(--red);
+        color: var(--paper);
+        overflow: hidden;
+        border-bottom: 2px solid rgba(0,0,0,.08);
+      }
+      .ticker-inner {
+        min-height: 42px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        white-space: nowrap;
+        font-size: 13px;
+        animation: tickerMove 20s linear infinite;
+      }
+      .ticker-badge {
+        background: var(--paper);
+        color: var(--red);
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        padding: 5px 12px;
+      }
+      @keyframes tickerMove { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+      main { padding: 28px 0 52px; }
+      .hero {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+      .hero-feature,
+      .side-column,
+      .card,
+      .analysis,
+      .opinion,
+      .newsletter,
+      .cta {
+        background: var(--paper);
+        border: 1px solid var(--line);
+      }
+      .hero-feature { padding: 18px; }
+      .hero-feature:hover,
+      .card:hover,
+      .analysis:hover,
+      .opinion:hover,
+      .side-column:hover {
+        box-shadow: 0 12px 28px rgba(18, 18, 18, 0.08);
+      }
+      .hero-image {
+        height: 355px;
+        position: relative;
+        overflow: hidden;
+        background-image: url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=80');
+        background-size: cover;
+        background-position: center;
+        border-radius: 0;
+      }
+      .hero-image::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,.65), transparent 35%);
+      }
+      .hero-image::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(45deg, rgba(255,255,255,.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.04) 50%, rgba(255,255,255,.04) 75%, transparent 75%, transparent);
+        background-size: 24px 24px;
+      }
+      .hero-tag {
+        display: inline-block;
+        margin: 18px 0 10px;
+        background: var(--red);
+        color: var(--paper);
+        padding: 7px 12px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+      }
+      .hero h1 {
+        margin: 0 0 12px;
+        font-size: clamp(32px, 4vw, 52px);
+        line-height: 0.97;
+        letter-spacing: -0.06em;
+      }
+      .hero p {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+      .meta {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        border-top: 1px solid var(--line);
+        padding-top: 12px;
+      }
+      .meta strong { color: var(--blue); }
+
+      .side-column { padding: 18px 18px 0; }
+      .side-column .side-item:hover h3 {
+        color: var(--red);
+      }
+      .small-heading {
+        margin: 0 0 18px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: #747474;
+      }
+      .side-item {
+        display: flex;
+        gap: 12px;
+        padding-bottom: 14px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--line);
+      }
+      .thumb {
+        width: 94px;
+        height: 72px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        background-size: cover;
+        background-position: center;
+      }
+      .t1 { background-image: url('https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=500&q=80'); }
+      .t2 { background-image: url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=500&q=80'); }
+      .t3 { background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=500&q=80'); }
+      .t4 { background-image: url('https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=500&q=80'); }
+      .side-item h3 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        line-height: 1.25;
+      }
+      .side-item span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin: 34px 0 18px;
+      }
+      .section-header h2 {
+        margin: 0;
+        background: #111111;
+        color: white;
+        padding: 10px 16px;
+        font-size: 14px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        box-shadow: 0 8px 18px rgba(17,17,17,0.08);
+      }
+      .section-header .line {
+        flex: 1;
+        height: 2px;
+        background: var(--line);
+      }
+      .section-header .more {
+        color: var(--red);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+
+      .breaking-strip {
+        margin: 20px 0 0;
+        background: #111111;
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--paper);
+        display: grid;
+        grid-template-columns: 170px 1fr;
+      }
+      .breaking-head {
+        background: var(--red);
+        color: var(--paper);
+        padding: 16px 18px;
+        font-size: 11px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+      }
+      .breaking-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 0;
+      }
+      .breaking-item {
+        padding: 14px 16px;
+        border-left: 1px solid rgba(255,255,255,0.08);
+      }
+      .breaking-item strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 10px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #f3c7c7;
+      }
+      .breaking-item span {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .card a,
+      .card article {
+        display: block;
+      }
+      .card {
+        padding: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+      }
+      .mini-visual {
+        height: 150px;
+        margin-bottom: 12px;
+        background-image: url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=800&q=80');
+        background-size: cover;
+        background-position: center;
+      }
+      .mini-visual.v2 { background-image: url('https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=800&q=80'); }
+      .mini-visual.v3 { background-image: url('https://images.unsplash.com/photo-1515169067868-5387ec356754?auto=format&fit=crop&w=800&q=80'); }
+      .mini-visual.v4 { background-image: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80'); }
+      .card-tag {
+        display: inline-block;
+        color: var(--gold);
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+      .card h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+        line-height: 1.3;
+      }
+      .card .meta {
+        padding-top: 0;
+        border-top: none;
+      }
+
+      .two-columns {
+        display: grid;
+        grid-template-columns: 1.15fr .85fr;
+        gap: 18px;
+        margin-top: 20px;
+      }
+      .analysis, .opinion { padding: 18px; }
+      .quote {
+        font-size: 44px;
+        color: #dddddd;
+        line-height: 1;
+        margin: 0;
+      }
+      .analysis p, .opinion p {
+        margin: 0 0 12px;
+        font-size: 16px;
+      }
+      .author {
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .feature-box {
+        display: grid;
+        grid-template-columns: 1.3fr .7fr;
+        gap: 20px;
+        margin-top: 22px;
+        border-top: 2px solid var(--line);
+        padding-top: 18px;
+      }
+      .feature-visual {
+        height: 240px;
+        background-image: url('https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=1000&q=80');
+        background-size: cover;
+        background-position: center;
+      }
+      .feature-box h3 {
+        margin: 14px 0 8px;
+        font-size: 28px;
+        line-height: 1.14;
+      }
+      .feature-box p {
+        color: var(--muted);
+      }
+      .rank-list {
+        border-left: 1px solid var(--line);
+        padding-left: 16px;
+      }
+      .rank-item {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .rank-item:last-child { border-bottom: none; }
+      .rank-item strong {
+        margin-right: 10px;
+        font-size: 22px;
+        color: #d0d0d0;
+      }
+      .rank-item h4 {
+        display: inline;
+        margin: 0;
+        font-size: 17px;
+      }
+      .rank-item span {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+
+      .cta {
+        margin-top: 36px;
+        background: linear-gradient(135deg, #173f7f, #0d2347);
+        color: var(--paper);
+        padding: 28px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      .whatsapp-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #25d366;
+        color: white;
+        padding: 10px 14px;
+        margin-top: 12px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .cta::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, rgba(255,255,255,0.08), transparent 30%, rgba(255,255,255,0.04));
+      }
+      .cta > * {
+        position: relative;
+        z-index: 1;
+      }
+      .cta h2 {
+        margin: 0;
+        font-size: clamp(24px, 3vw, 38px);
+        line-height: 1.1;
+      }
+      .cta p {
+        margin: 8px 0 0;
+        color: #deebff;
+      }
+      .cta-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .primary-btn,
+      .secondary-btn {
+        border: none;
+        padding: 12px 18px;
+        font-weight: 800;
+        letter-spacing: .09em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .primary-btn { background: var(--gold); color: #111111; }
+      .secondary-btn {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.4);
+        color: var(--paper);
+      }
+
+      .newsletter {
+        margin-top: 26px;
+        background: #101010;
+        color: var(--paper);
+        padding: 22px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      .newsletter h3 {
+        margin: 0 0 4px;
+        font-size: 26px;
+      }
+      .newsletter p {
+        margin: 0;
+        color: #bebebe;
+      }
+      .newsletter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .newsletter-form input {
+        min-width: min(300px, 100%);
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.18);
+        color: var(--paper);
+        padding: 12px 14px;
+      }
+      .newsletter-form input::placeholder { color: #b7b7b7; }
+      .newsletter-form button {
+        background: var(--red);
+        color: var(--paper);
+        border: none;
+        padding: 12px 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        cursor: pointer;
+      }
+
+      footer {
+        background: #101010;
+        color: #d5d5d5;
+        padding: 32px 0 26px;
+      }
+      .footer-brand {
+        font-size: 20px;
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        color: var(--paper);
+      }
+      .footer-brand span { color: var(--red); }
+      .footer-tag {
+        margin-top: 8px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        color: #8d8d8d;
+      }
+      .footer-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 24px;
+        border-top: 1px solid rgba(255,255,255,.08);
+        margin-top: 24px;
+        padding-top: 22px;
+      }
+      .footer-col h4 {
+        margin: 0 0 12px;
+        color: var(--paper);
+        font-size: 12px;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .footer-col a {
+        display: block;
+        margin: 8px 0;
+        color: #d3d3d3;
+      }
+      .footer-bottom {
+        margin-top: 20px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(255,255,255,.08);
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        font-size: 12px;
+        color: #9e9e9e;
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .two-columns,
+        .feature-box,
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        .header-inner,
+        .newsletter,
+        .cta {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+
+      @media (max-width: 600px) {
+        .topbar-inner,
+        .header-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .brand-text {
+          font-size: 28px;
+        }
+        .menu-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+        .nav-inner {
+          display: none;
+          width: 100%;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 12px 18px;
+          padding: 12px 0 18px;
+        }
+        .nav-inner.open {
+          display: flex;
+        }
+        .nav-inner a {
+          font-size: 11px;
+          letter-spacing: .08em;
+        }
+        .hero h1 {
+          font-size: 30px;
+        }
+        .newsletter-form {
+          width: 100%;
+        }
+        .newsletter-form input,
+        .search-box {
+          width: 100%;
+          min-width: 0;
+        }
+        .search-box {
+          border-radius: 12px;
+        }
+        .footer-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="container topbar-inner">
+        <div class="topbar-left">
+          <span data-i18n="date">Mardi, 26 août 2026</span>
+          <span data-i18n="weather">Port-au-Prince • 31°C</span>
+        </div>
+        <div class="lang-switch">
+          <button class="lang-btn active" data-lang="fr">FR</button>
+          <button class="lang-btn" data-lang="ht">KR</button>
+        </div>
+      </div>
+    </div>
+
+    <header>
+      <div class="container header-inner">
+        <div class="brand">
+          <div class="brand-text">KALFOU <span>NOUVELLES</span></div>
+          <div class="brand-tag" data-i18n="tagline">Actualités • Analyse • Opinion</div>
+        </div>
+        <button class="menu-toggle" type="button" aria-expanded="false">Menu</button>
+        <div class="search-box">
+          <span>🔎</span>
+          <input type="text" data-placeholder="search" placeholder="Rechercher..." />
+        </div>
+      </div>
+    </header>
+
+    <nav>
+      <div class="container nav-inner open">
+        <a href="KalfouNouvel.html" class="active" data-i18n="nav_home">Accueil</a>
+        <a href="article.html" data-i18n="nav_politique">Politique</a>
+        <a href="article.html" data-i18n="nav_economie">Économie</a>
+        <a href="article.html" data-i18n="nav_societe">Société</a>
+        <a href="article.html" data-i18n="nav_culture">Culture</a>
+        <a href="article.html" data-i18n="nav_sport">Sport</a>
+        <a href="article.html" data-i18n="nav_opinion">Opinion</a>
+        <a href="publicite.html">Publicité</a>
+        <a href="soumettre.html">Soumettre</a>
+        <a href="contact.html" data-i18n="nav_contact">Contact</a>
+      </div>
+    </nav>
+
+    <div class="ticker">
+      <div class="container ticker-inner">
+        <span class="ticker-badge" data-i18n="breaking">À la une</span>
+        <span data-i18n="ticker_1">Le gouvernement présente un nouveau plan de sécurité • Les prix augmentent dans plusieurs quartiers • Le football national relance l’espoir • La diaspora soutient les initiatives locales</span>
+      </div>
+    </div>
+
+    <main>
+      <div class="container">
+        <section class="hero">
+          <article class="hero-feature">
+            <div class="hero-image"></div>
+            <div class="hero-tag" data-i18n="hero_tag">Politique • Analyse</div>
+            <h1 data-i18n="hero_title">La crise politique de Haïti met à rude épreuve l’avenir du pays</h1>
+            <p data-i18n="hero_text">Alors que les institutions restent fragiles, les citoyens réclament plus de clarté, de justice et de solutions concrètes. Le débat national prend une tournure plus urgente que jamais.</p>
+            <div class="meta">
+              <span><strong data-i18n="author_name">Marie-Claire Estimé</strong></span>
+              <span data-i18n="hero_meta">18 août 2026 • 8 min de lecture</span>
+            </div>
+          </article>
+
+          <aside class="side-column">
+            <h3 class="small-heading" data-i18n="more_news">Plus d’articles</h3>
+
+            <div class="side-item">
+              <div class="thumb t1">💰</div>
+              <div>
+                <h3 data-i18n="side_title_1">Le dollar continue d’influencer chaque achat du quotidien</h3>
+                <span data-i18n="side_time_1">Il y a 2 heures</span>
+              </div>
+            </div>
+
+            <div class="side-item">
+              <div class="thumb t2">🌱</div>
+              <div>
+                <h3 data-i18n="side_title_2">L’agriculture locale reçoit un nouvel appui technologique</h3>
+                <span data-i18n="side_time_2">Il y a 4 heures</span>
+              </div>
+            </div>
+
+            <div class="side-item">
+              <div class="thumb t3">✈️</div>
+              <div>
+                <h3 data-i18n="side_title_3">La diaspora crée des réseaux de solidarité économique</h3>
+                <span data-i18n="side_time_3">Hier</span>
+              </div>
+            </div>
+
+            <div class="side-item">
+              <div class="thumb t4">🎭</div>
+              <div>
+                <h3 data-i18n="side_title_4">Les artistes jeunes prennent la parole avec plus de force</h3>
+                <span data-i18n="side_time_4">Hier soir</span>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="breaking-strip" aria-label="Dernière minute">
+          <div class="breaking-head" data-i18n="breaking_head">Dernière minute</div>
+          <div class="breaking-list">
+            <div class="breaking-item">
+              <strong data-i18n="breaking_label_1">Politique</strong>
+              <span data-i18n="breaking_text_1">Les institutions réclament une réponse rapide et claire.</span>
+            </div>
+            <div class="breaking-item">
+              <strong data-i18n="breaking_label_2">Économie</strong>
+              <span data-i18n="breaking_text_2">Les prix reflètent une tension persistante sur le marché.</span>
+            </div>
+            <div class="breaking-item">
+              <strong data-i18n="breaking_label_3">Société</strong>
+              <span data-i18n="breaking_text_3">Des initiatives locales renforcent l’espoir dans plusieurs quartiers.</span>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-header">
+          <h2 data-i18n="latest">Dernières infos</h2>
+          <div class="line"></div>
+          <span class="more" data-i18n="see_all">Tout voir</span>
+        </div>
+
+        <section class="cards">
+          <a href="article.html" style="display:block; color:inherit;">
+            <article class="card">
+              <div class="mini-visual"></div>
+              <span class="card-tag" data-i18n="tag_politique">Politique</span>
+              <h3 data-i18n="card_title_1">Le parlement examine de nouvelles mesures de sécurité</h3>
+              <div class="meta"><span data-i18n="card_meta_1">Jean-Robert • 1 heure</span></div>
+            </article>
+          </a>
+
+          <a href="article.html" style="display:block; color:inherit;">
+            <article class="card">
+              <div class="mini-visual v2"></div>
+              <span class="card-tag" data-i18n="tag_economie">Économie</span>
+              <h3 data-i18n="card_title_2">Les commerçants demandent plus de stabilité dans les marchés</h3>
+              <div class="meta"><span data-i18n="card_meta_2">Nadège • 3 heures</span></div>
+            </article>
+          </a>
+
+          <a href="article.html" style="display:block; color:inherit;">
+            <article class="card">
+              <div class="mini-visual v3"></div>
+              <span class="card-tag" data-i18n="tag_culture">Culture</span>
+              <h3 data-i18n="card_title_3">Une exposition met en lumière la créativité haïtienne</h3>
+              <div class="meta"><span data-i18n="card_meta_3">Claudette • 5 heures</span></div>
+            </article>
+          </a>
+
+          <a href="article.html" style="display:block; color:inherit;">
+            <article class="card">
+              <div class="mini-visual v4"></div>
+              <span class="card-tag" data-i18n="tag_societe">Société</span>
+              <h3 data-i18n="card_title_4">Des initiatives locales renforcent l’accès aux services</h3>
+              <div class="meta"><span data-i18n="card_meta_4">Yves • 7 heures</span></div>
+            </article>
+          </a>
+        </section>
+
+        <div class="two-columns">
+          <section class="analysis">
+            <div class="section-header" style="margin-top:0;">
+              <h2 data-i18n="analysis_title">Analyse</h2>
+              <div class="line"></div>
+            </div>
+            <p class="quote">“</p>
+            <p data-i18n="analysis_quote">La stabilité d’un pays ne se construit pas seulement avec des discours, mais avec des décisions courageuses et une confiance durable.</p>
+            <div class="author" data-i18n="analysis_author">— Prof. Émile Beaumont</div>
+          </section>
+
+          <section class="opinion">
+            <div class="section-header" style="margin-top:0;">
+              <h2 data-i18n="opinion_title">Opinion</h2>
+              <div class="line"></div>
+            </div>
+            <p class="quote">“</p>
+            <p data-i18n="opinion_quote">Les jeunes haïtiens ont le talent et la volonté, mais ils ont aussi besoin d’opportunités réelles pour s’épanouir.</p>
+            <div class="author" data-i18n="opinion_author">— Marcus Fils-Aimé</div>
+          </section>
+        </div>
+
+        <section class="feature-box">
+          <div>
+            <div class="feature-visual"></div>
+            <span class="card-tag" style="color: var(--green); margin-top: 14px; display: inline-block;" data-i18n="sport_tag">Sport</span>
+            <h3 data-i18n="feature_title">L’équipe nationale inspire le pays avec un match décisif</h3>
+            <p data-i18n="feature_text">Une performance solide, beaucoup de discipline et un soutien populaire ont redonné de l’énergie au football haïtien et au pays tout entier.</p>
+          </div>
+
+          <div class="rank-list">
+            <div class="rank-item">
+              <strong>01</strong>
+              <h4 data-i18n="rank_1">Haïti et l’OEA relancent le dialogue démocratique</h4>
+              <span data-i18n="rank_1_time">12 heures • 8,2K lectures</span>
+            </div>
+            <div class="rank-item">
+              <strong>02</strong>
+              <h4 data-i18n="rank_2">Des solutions locales émergent face au manque d’eau</h4>
+              <span data-i18n="rank_2_time">Hier • 5,7K lectures</span>
+            </div>
+            <div class="rank-item">
+              <strong>03</strong>
+              <h4 data-i18n="rank_3">Les femmes du secteur informel réclament plus de droits</h4>
+              <span data-i18n="rank_3_time">2 jours • 4,1K lectures</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="cta">
+          <div>
+            <h2 data-i18n="cta_title">Vous avez une histoire à raconter ?</h2>
+            <p data-i18n="cta_subtitle">La vérité, les voix et les idées ont besoin d’un espace.</p>
+          </div>
+          <div class="cta-actions">
+            <a href="soumettre.html" class="primary-btn" data-i18n="cta_primary" style="display:inline-flex; align-items:center; justify-content:center;">Publier un article</a>
+            <a href="contact.html" class="secondary-btn" data-i18n="cta_secondary" style="display:inline-flex; align-items:center; justify-content:center;">Nous contacter</a>
+          </div>
+        </section>
+
+        <section class="newsletter">
+          <div>
+            <h3 data-i18n="newsletter_title">Recevez l’info chaque matin</h3>
+            <p data-i18n="newsletter_subtitle">Un résumé clair, simple et utile, directement dans votre boîte mail.</p>
+          </div>
+          <form class="newsletter-form">
+            <input type="email" data-placeholder="email" placeholder="Votre e-mail" />
+            <button type="button" data-i18n="newsletter_button">S’inscrire</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
+        <div class="footer-brand">KALFOU <span>NOUVELLES</span></div>
+        <div class="footer-tag" data-i18n="footer_tag">Actualités Haïti • Journalisme simple et fiable</div>
+
+        <div class="footer-grid">
+          <div class="footer-col">
+            <h4 data-i18n="footer_section">Sections</h4>
+            <a href="KalfouNouvel.html" data-i18n="footer_home">Accueil</a>
+            <a href="article.html" data-i18n="footer_politique">Politique</a>
+            <a href="article.html" data-i18n="footer_economie">Économie</a>
+            <a href="article.html" data-i18n="footer_societe">Société</a>
+          </div>
+
+          <div class="footer-col">
+            <h4 data-i18n="footer_about">À propos</h4>
+            <a href="about.html" data-i18n="footer_story">Notre histoire</a>
+            <a href="soumettre.html">Soumettre</a>
+            <a href="contact.html" data-i18n="footer_contact">Contact</a>
+            <a href="team.html" data-i18n="footer_team">Équipe</a>
+            <a href="about.html" data-i18n="footer_terms">Mentions légales</a>
+          </div>
+
+          <div class="footer-col">
+            <h4 data-i18n="footer_follow">Suivez-nous</h4>
+            <a href="#">Facebook</a>
+            <a href="#">Instagram</a>
+            <a href="#">X / Twitter</a>
+            <a href="#">YouTube</a>
+            <a class="whatsapp-link" href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20vous%20contacter." target="_blank" rel="noopener">WhatsApp</a>
+          </div>
+
+          <div class="footer-col">
+            <h4 data-i18n="footer_media">Médias</h4>
+            <a href="#" data-i18n="footer_culture">Culture</a>
+            <a href="#" data-i18n="footer_sport">Sport</a>
+            <a href="#" data-i18n="footer_opinion">Opinion</a>
+            <a href="#" data-i18n="footer_diaspora">Diaspora</a>
+            <a href="publicite.html">Publicité</a>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <span>© 2026 Kalfou Nouvelles</span>
+          <span data-i18n="footer_city">Port-au-Prince, Haïti</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const translations = {
+        fr: {
+          date: 'Mardi, 26 août 2026',
+          weather: 'Port-au-Prince • 31°C',
+          tagline: 'Actualités • Analyse • Opinion',
+          search: 'Rechercher...',
+          nav_home: 'Accueil',
+          nav_politique: 'Politique',
+          nav_economie: 'Économie',
+          nav_societe: 'Société',
+          nav_culture: 'Culture',
+          nav_sport: 'Sport',
+          nav_opinion: 'Opinion',
+          nav_contact: 'Contact',
+          breaking: 'À la une',
+          ticker_1: 'Le gouvernement présente un nouveau plan de sécurité • Les prix augmentent dans plusieurs quartiers • Le football national relance l’espoir • La diaspora soutient les initiatives locales',
+          more_news: 'Plus d’articles',
+          hero_tag: 'Politique • Analyse',
+          hero_title: 'La crise politique de Haïti met à rude épreuve l’avenir du pays',
+          hero_text: 'Alors que les institutions restent fragiles, les citoyens réclament plus de clarté, de justice et de solutions concrètes. Le débat national prend une tournure plus urgente que jamais.',
+          author_name: 'Marie-Claire Estimé',
+          hero_meta: '18 août 2026 • 8 min de lecture',
+          side_title_1: 'Le dollar continue d’influencer chaque achat du quotidien',
+          side_time_1: 'Il y a 2 heures',
+          side_title_2: 'L’agriculture locale reçoit un nouvel appui technologique',
+          side_time_2: 'Il y a 4 heures',
+          side_title_3: 'La diaspora crée des réseaux de solidarité économique',
+          side_time_3: 'Hier',
+          side_title_4: 'Les artistes jeunes prennent la parole avec plus de force',
+          side_time_4: 'Hier soir',
+          latest: 'Dernières infos',
+          see_all: 'Tout voir',
+          breaking_head: 'Dernière minute',
+          breaking_label_1: 'Politique',
+          breaking_text_1: 'Les institutions réclament une réponse rapide et claire.',
+          breaking_label_2: 'Économie',
+          breaking_text_2: 'Les prix reflètent une tension persistante sur le marché.',
+          breaking_label_3: 'Société',
+          breaking_text_3: 'Des initiatives locales renforcent l’espoir dans plusieurs quartiers.',
+          tag_politique: 'Politique',
+          tag_economie: 'Économie',
+          tag_culture: 'Culture',
+          tag_societe: 'Société',
+          card_title_1: 'Le parlement examine de nouvelles mesures de sécurité',
+          card_meta_1: 'Jean-Robert • 1 heure',
+          card_title_2: 'Les commerçants demandent plus de stabilité dans les marchés',
+          card_meta_2: 'Nadège • 3 heures',
+          card_title_3: 'Une exposition met en lumière la créativité haïtienne',
+          card_meta_3: 'Claudette • 5 heures',
+          card_title_4: 'Des initiatives locales renforcent l’accès aux services',
+          card_meta_4: 'Yves • 7 heures',
+          analysis_title: 'Analyse',
+          analysis_quote: 'La stabilité d’un pays ne se construit pas seulement avec des discours, mais avec des décisions courageuses et une confiance durable.',
+          analysis_author: '— Prof. Émile Beaumont',
+          opinion_title: 'Opinion',
+          opinion_quote: 'Les jeunes haïtiens ont le talent et la volonté, mais ils ont aussi besoin d’opportunités réelles pour s’épanouir.',
+          opinion_author: '— Marcus Fils-Aimé',
+          sport_tag: 'Sport',
+          feature_title: 'L’équipe nationale inspire le pays avec un match décisif',
+          feature_text: 'Une performance solide, beaucoup de discipline et un soutien populaire ont redonné de l’énergie au football haïtien et au pays tout entier.',
+          rank_1: 'Haïti et l’OEA relancent le dialogue démocratique',
+          rank_1_time: '12 heures • 8,2K lectures',
+          rank_2: 'Des solutions locales émergent face au manque d’eau',
+          rank_2_time: 'Hier • 5,7K lectures',
+          rank_3: 'Les femmes du secteur informel réclament plus de droits',
+          rank_3_time: '2 jours • 4,1K lectures',
+          cta_title: 'Vous avez une histoire à raconter ?',
+          cta_subtitle: 'La vérité, les voix et les idées ont besoin d’un espace.',
+          cta_primary: 'Publier un article',
+          cta_secondary: 'Nous contacter',
+          newsletter_title: 'Recevez l’info chaque matin',
+          newsletter_subtitle: 'Un résumé clair, simple et utile, directement dans votre boîte mail.',
+          email: 'Votre e-mail',
+          newsletter_button: 'S’inscrire',
+          footer_tag: 'Actualités Haïti • Journalisme simple et fiable',
+          footer_section: 'Sections',
+          footer_home: 'Accueil',
+          footer_politique: 'Politique',
+          footer_economie: 'Économie',
+          footer_societe: 'Société',
+          footer_about: 'À propos',
+          footer_story: 'Notre histoire',
+          footer_contact: 'Contact',
+          footer_team: 'Équipe',
+          footer_terms: 'Mentions légales',
+          footer_follow: 'Suivez-nous',
+          footer_media: 'Médias',
+          footer_culture: 'Culture',
+          footer_sport: 'Sport',
+          footer_opinion: 'Opinion',
+          footer_diaspora: 'Diaspora',
+          footer_city: 'Port-au-Prince, Haïti',
+          menu_open: 'Menu',
+          menu_close: 'Fermer'
+        },
+        ht: {
+          date: 'Madi, 26 out 2026',
+          weather: 'Pòtoprens • 31°C',
+          tagline: 'Nouvèl • Analiz • Opinyon',
+          search: 'Chache...',
+          nav_home: 'Akèy',
+          nav_politique: 'Politik',
+          nav_economie: 'Ekonomi',
+          nav_societe: 'Sosyete',
+          nav_culture: 'Kilti',
+          nav_sport: 'Espò',
+          nav_opinion: 'Opinyon',
+          nav_contact: 'Kontak',
+          breaking: 'Dènye nouvèl',
+          ticker_1: 'Gouvènman an prezante nouvo plan sekirite • Pri yo monte nan plizyè katye • Espò nasyonal la revitalize • Dijaspora a sipòte inisyativ lokal yo',
+          more_news: 'Plis atik',
+          hero_tag: 'Politik • Analiz',
+          hero_title: 'Kriz politik Ayiti a mete lavni peyi a sou tèt chaj',
+          hero_text: 'Pandan enstitisyon yo toujou frajil, sitwayen yo mande plis klè, jistis ak solisyon reyèl. Deba nasyonal la pran yon fason pi grav e pi ijan.',
+          author_name: 'Marie-Claire Estimé',
+          hero_meta: '18 out 2026 • 8 minit lekti',
+          side_title_1: 'Dola a kontinye enfliyanse chak acha chak jou',
+          side_time_1: '2 èdtan de sa',
+          side_title_2: 'Agrikilti lokal la resevwa nouvo sipò teknoloji',
+          side_time_2: '4 èdtan de sa',
+          side_title_3: 'Dijaspora a kreye rezo solidarite ekonomik',
+          side_time_3: 'Yè',
+          side_title_4: 'Jèn atis yo pran paròl ak plis fòs',
+          side_time_4: 'Yè aswè',
+          latest: 'Dènye nouvèl',
+          see_all: 'Wè tout',
+          breaking_head: 'Dènye minit',
+          breaking_label_1: 'Politik',
+          breaking_text_1: 'Enstitisyon yo mande yon repons rapid ak klè.',
+          breaking_label_2: 'Ekonomi',
+          breaking_text_2: 'Pri yo reflete yon tansyon ki kontinye sou mache a.',
+          breaking_label_3: 'Sosyete',
+          breaking_text_3: 'Inisyativ lokal yo ranfòse lespwa nan plizyè katye.',
+          tag_politique: 'Politik',
+          tag_economie: 'Ekonomi',
+          tag_culture: 'Kilti',
+          tag_societe: 'Sosyete',
+          card_title_1: 'Palman an ap egzamine nouvo mezi sekirite',
+          card_meta_1: 'Jean-Robert • 1 èdtan',
+          card_title_2: 'Komèsan yo mande plis estabilite nan mache yo',
+          card_meta_2: 'Nadège • 3 èdtan',
+          card_title_3: 'Yon egzibisyon mete kreyativite ayisyen an sou limyè',
+          card_meta_3: 'Claudette • 5 èdtan',
+          card_title_4: 'Inisyativ lokal yo ranfòse aksè nan sèvis',
+          card_meta_4: 'Yves • 7 èdtan',
+          analysis_title: 'Analiz',
+          analysis_quote: 'Estabilite yon peyi pa bati sèlman ak diskou, men ak desizyon ki gen kouraj epi ak konfyans ki dire lontan.',
+          analysis_author: '— Prof. Émile Beaumont',
+          opinion_title: 'Opinyon',
+          opinion_quote: 'Jèn Ayisyen yo gen talan ak volonte, men yo bezwen opòtinite reyèl pou devlope yo.',
+          opinion_author: '— Marcus Fils-Aimé',
+          sport_tag: 'Espò',
+          feature_title: 'Ekip nasyonal la enspire peyi a ak yon match desizif',
+          feature_text: 'Yon pèfòmans solid, anpil disiplin ak sipò popilè rekonsolide espwa nan foutbòl Ayisyen ak nan peyi an jeneral.',
+          rank_1: 'Ayiti ak OEA relanse dyalòg demokratik la',
+          rank_1_time: '12 èdtan • 8,2K lekti',
+          rank_2: 'Solisyon lokal yo parèt nan fron mank dlo a',
+          rank_2_time: 'Yè • 5,7K lekti',
+          rank_3: 'Fanm nan sektè enfòmèl la mande plis dwa',
+          rank_3_time: '2 jou • 4,1K lekti',
+          cta_title: 'Ou gen yon istwa pou rakonte ?',
+          cta_subtitle: 'Verite, vwa ak lide yo bezwen yon espas.',
+          cta_primary: 'Pibliye atik',
+          cta_secondary: 'Kontakte nou',
+          newsletter_title: 'Resevwa enfòmasyon chak maten',
+          newsletter_subtitle: 'Yon resum klè, senp ak itil, dirèkteman nan bwat imèl ou.',
+          email: 'Imèl ou',
+          newsletter_button: 'Enskri',
+          footer_tag: 'Nouvèl Ayiti • Jounalis senp ak fyab',
+          footer_section: 'Seksyon',
+          footer_home: 'Akèy',
+          footer_politique: 'Politik',
+          footer_economie: 'Ekonomi',
+          footer_societe: 'Sosyete',
+          footer_about: 'A pwopos',
+          footer_story: 'Istwa nou',
+          footer_contact: 'Kontak',
+          footer_team: 'Ekip',
+          footer_terms: 'Lwa ak règ',
+          footer_follow: 'Swiv nou',
+          footer_media: 'Medya',
+          footer_culture: 'Kilti',
+          footer_sport: 'Espò',
+          footer_opinion: 'Opinyon',
+          footer_diaspora: 'Dijaspora',
+          footer_city: 'Pòtoprens, Ayiti',
+          menu_open: 'Menu',
+          menu_close: 'Fèmen'
+        }
+      };
+
+      function updateLanguage(lang) {
+        const selected = translations[lang];
+        document.querySelectorAll('[data-i18n]').forEach((el) => {
+          const key = el.dataset.i18n;
+          if (selected[key]) el.textContent = selected[key];
+        });
+        document.querySelectorAll('[data-placeholder]').forEach((el) => {
+          const key = el.dataset.placeholder;
+          if (selected[key]) el.placeholder = selected[key];
+        });
+        document.documentElement.lang = lang === 'ht' ? 'ht' : 'fr';
+        document.querySelectorAll('.lang-btn').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        if (menuToggle) {
+          const isOpen = navInner && navInner.classList.contains('open');
+          menuToggle.textContent = isOpen ? selected.menu_close : selected.menu_open;
+        }
+      }
+
+      const navInner = document.querySelector('.nav-inner');
+      const menuToggle = document.querySelector('.menu-toggle');
+
+      if (menuToggle && navInner) {
+        menuToggle.addEventListener('click', () => {
+          const isOpen = navInner.classList.toggle('open');
+          menuToggle.setAttribute('aria-expanded', String(isOpen));
+          const currentLang = document.documentElement.lang === 'ht' ? 'ht' : 'fr';
+          menuToggle.textContent = isOpen ? translations[currentLang].menu_close : translations[currentLang].menu_open;
+        });
+      }
+
+      async function loadPublishedArticles() {
+        try {
+          const response = await fetch('/api/public/articles');
+          const result = await response.json();
+          if (!response.ok || !Array.isArray(result.articles) || !result.articles.length) {
+            return;
+          }
+
+          const cardsContainer = document.querySelector('.cards');
+          if (!cardsContainer) return;
+
+          const featured = result.articles[0];
+          const heroTag = document.querySelector('.hero-tag');
+          const heroTitle = document.querySelector('.hero-feature h1');
+          const heroText = document.querySelector('.hero-feature p');
+          const heroMeta = document.querySelector('.hero-feature .meta');
+
+          if (heroTag) heroTag.textContent = featured.category || 'Politique';
+          if (heroTitle) heroTitle.textContent = featured.title || heroTitle.textContent;
+          if (heroText) heroText.textContent = featured.summary || heroText.textContent;
+          if (heroMeta) {
+            heroMeta.innerHTML = `<span><strong>${featured.author || 'Rédaction'}</strong></span><span>${formatDisplayDate(featured.createdAt)} • ${featured.category || 'Actualité'}</span>`;
+          }
+
+          const featuredImage = document.querySelector('.hero-image');
+          if (featuredImage) {
+            const gradient = ['linear-gradient(135deg, rgba(21, 52, 95, 0.38), rgba(0,0,0,0.18))', 'linear-gradient(135deg, rgba(216, 43, 43, 0.38), rgba(0,0,0,0.18))', 'linear-gradient(135deg, rgba(18, 113, 77, 0.38), rgba(0,0,0,0.18))'];
+            const index = Math.abs(featured.title.length) % gradient.length;
+            featuredImage.style.backgroundImage = `${gradient[index]}, url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80')`;
+          }
+
+          const fragment = document.createDocumentFragment();
+          result.articles.slice(1, 5).forEach((item, index) => {
+            const articleLink = document.createElement('a');
+            articleLink.href = `article.html?id=${encodeURIComponent(item.id)}`;
+            articleLink.style.display = 'block';
+            articleLink.style.color = 'inherit';
+
+            const card = document.createElement('article');
+            card.className = 'card';
+
+            const visual = document.createElement('div');
+            visual.className = 'mini-visual';
+            const palettes = ['linear-gradient(135deg, #d82b2b, #7b1e1e)', 'linear-gradient(135deg, #1a4f9d, #101f3d)', 'linear-gradient(135deg, #14734d, #0f3e2f)', 'linear-gradient(135deg, #d7a516, #744f00)'];
+            const palette = palettes[index % palettes.length];
+            visual.style.background = palette;
+            visual.style.backgroundSize = 'cover';
+            visual.style.backgroundPosition = 'center';
+
+            const tag = document.createElement('span');
+            tag.className = 'card-tag';
+            tag.textContent = item.category || 'Actualité';
+
+            const title = document.createElement('h3');
+            title.textContent = item.title;
+
+            const meta = document.createElement('div');
+            meta.className = 'meta';
+            const metaSpan = document.createElement('span');
+            metaSpan.textContent = `${item.author || 'Rédaction'} • ${formatDisplayDate(item.createdAt)}`;
+            meta.appendChild(metaSpan);
+
+            card.appendChild(visual);
+            card.appendChild(tag);
+            card.appendChild(title);
+            card.appendChild(meta);
+            articleLink.appendChild(card);
+            fragment.appendChild(articleLink);
+          });
+
+          cardsContainer.innerHTML = '';
+          cardsContainer.appendChild(fragment);
+        } catch (error) {
+          console.error('Unable to load published articles:', error);
+        }
+      }
+
+      function formatDisplayDate(value) {
+        if (!value) return 'Aujourd’hui';
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return 'Aujourd’hui';
+        const now = new Date();
+        const diffH = Math.max(1, Math.round((now - date) / 3600000));
+        if (diffH < 24) return `${diffH} heure${diffH > 1 ? 's' : ''}`;
+        const diffD = Math.max(1, Math.round((now - date) / 86400000));
+        return `${diffD} jour${diffD > 1 ? 's' : ''}`;
+      }
+
+      document.querySelectorAll('.lang-btn').forEach((btn) => {
+        btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
+      });
+
+      updateLanguage('fr');
+      loadPublishedArticles();
+    </script>
+  </body>
+</html>

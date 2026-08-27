@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #171717;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+        --green: #14734d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      a { color: inherit; text-decoration: none; }
+      .container { width: min(1160px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #111111;
+        color: #d7d7d7;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        font-weight: 700;
+      }
+      main { padding: 36px 0 60px; }
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0,1fr));
+        gap: 18px;
+        margin-bottom: 22px;
+      }
+      .stat-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 18px;
+      }
+      .stat-card h3 {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+      }
+      .stat-card .big {
+        font-size: 32px;
+        font-weight: 900;
+      }
+      .panel {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 20px;
+        margin-bottom: 22px;
+      }
+      .auth-box {
+        max-width: 420px;
+        margin: 48px auto;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 24px;
+      }
+      .auth-box h2 {
+        margin-bottom: 12px;
+      }
+      .auth-box input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        background: #faf9f7;
+        margin: 10px 0 16px;
+      }
+      .auth-box button {
+        border: none;
+        background: var(--red);
+        color: white;
+        padding: 12px 18px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .hidden { display: none !important; }
+      h2 {
+        margin-top: 0;
+        margin-bottom: 16px;
+        font-size: clamp(24px, 3vw, 32px);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        text-align: left;
+        padding: 12px 10px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-size: 12px;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .empty {
+        color: var(--muted);
+        font-style: italic;
+      }
+      .mini-btn {
+        border: none;
+        padding: 8px 10px;
+        margin: 4px 4px 4px 0;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+      }
+      .mini-btn.primary {
+        background: var(--blue);
+        color: #fff;
+      }
+      .mini-btn.danger {
+        background: var(--red);
+        color: #fff;
+      }
+      footer {
+        background: #101010;
+        color: #d7d7d7;
+        padding: 22px 0;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 760px) {
+        .stats {
+          grid-template-columns: 1fr;
+        }
+        .nav-wrap, .topbar-inner, .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div id="authBox" class="auth-box">
+          <h2>Accès admin</h2>
+          <p>Entrez le mot de passe pour accéder au tableau de bord.</p>
+          <input id="adminPassword" type="password" placeholder="Mot de passe" />
+          <button id="unlockBtn" type="button">Accéder</button>
+        </div>
+
+        <div id="adminContent" class="hidden">
+          <div class="stats">
+          <div class="stat-card">
+            <h3>Articles</h3>
+            <div class="big" id="articleCount">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Messages</h3>
+            <div class="big" id="contactCount">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Publicité</h3>
+            <div class="big" id="publicityCount">0</div>
+          </div>
+        </div>
+
+        <section class="panel">
+          <h2>Soumissions d’articles</h2>
+          <div id="articlesPanel" class="empty">Aucune soumission pour le moment.</div>
+          <table id="articlesTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Auteur</th>
+                <th>Titre</th>
+                <th>Catégorie</th>
+                <th>Résumé</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="articlesBody"></tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <h2>Messages de contact</h2>
+          <div id="contactsPanel" class="empty">Aucun message reçu.</div>
+          <table id="contactsTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>E-mail</th>
+                <th>Sujet</th>
+                <th>Message</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="contactsBody"></tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <h2>Demandes de publicité</h2>
+          <div id="publicityPanel" class="empty">Aucune demande de publicité.</div>
+          <table id="publicityTable" style="display:none;">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Entreprise</th>
+                <th>E-mail</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="publicityBody"></tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        <div>© 2026 Kalfou Nouvelles</div>
+      </div>
+    </footer>
+
+    <script>
+      const ADMIN_PASSWORD = 'Kalfou2026';
+      const authBox = document.getElementById('authBox');
+      const adminContent = document.getElementById('adminContent');
+      const unlockBtn = document.getElementById('unlockBtn');
+      const adminPassword = document.getElementById('adminPassword');
+      const state = { password: '', data: null };
+
+      function formatDate(value) {
+        if (!value) return '—';
+        const date = new Date(value);
+        return isNaN(date.getTime()) ? value : date.toLocaleString('fr-FR');
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      async function callAdminAction(endpoint, payload) {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, password: state.password })
+        });
+
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(result.message || 'Action non autorisée.');
+        }
+
+        return result;
+      }
+
+      function renderArticleRows(items) {
+        const articleTable = document.getElementById('articlesTable');
+        const articlePanel = document.getElementById('articlesPanel');
+        const body = document.getElementById('articlesBody');
+
+        if (!items.length) {
+          articleTable.style.display = 'none';
+          articlePanel.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+
+        articleTable.style.display = 'table';
+        articlePanel.style.display = 'none';
+        body.innerHTML = items.map((item) => {
+          const status = item.status || 'pending';
+          const actionLabel = status === 'published' ? 'Dépublier' : 'Publier';
+          return `
+            <tr>
+              <td>${escapeHtml(item.author)}</td>
+              <td>${escapeHtml(item.title)}</td>
+              <td>${escapeHtml(item.category)}</td>
+              <td>${escapeHtml(item.summary)}</td>
+              <td>${escapeHtml(status)}</td>
+              <td>${escapeHtml(formatDate(item.createdAt))}</td>
+              <td>
+                <button class="mini-btn primary" data-action="toggle-article" data-id="${item.id}">${actionLabel}</button>
+                <button class="mini-btn danger" data-action="delete-article" data-id="${item.id}">Supprimer</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function renderContactRows(items) {
+        const contactTable = document.getElementById('contactsTable');
+        const contactPanel = document.getElementById('contactsPanel');
+        const body = document.getElementById('contactsBody');
+
+        if (!items.length) {
+          contactTable.style.display = 'none';
+          contactPanel.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+
+        contactTable.style.display = 'table';
+        contactPanel.style.display = 'none';
+        body.innerHTML = items.map((item) => `
+          <tr>
+            <td>${escapeHtml(item.name)}</td>
+            <td>${escapeHtml(item.email)}</td>
+            <td>${escapeHtml(item.subject)}</td>
+            <td>${escapeHtml(item.message)}</td>
+            <td>${escapeHtml(formatDate(item.createdAt))}</td>
+            <td><button class="mini-btn danger" data-action="delete-contact" data-id="${item.id}">Supprimer</button></td>
+          </tr>
+        `).join('');
+      }
+
+      function renderPublicityRows(items) {
+        const publicityTable = document.getElementById('publicityTable');
+        const publicityPanel = document.getElementById('publicityPanel');
+        const body = document.getElementById('publicityBody');
+
+        if (!items.length) {
+          publicityTable.style.display = 'none';
+          publicityPanel.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+
+        publicityTable.style.display = 'table';
+        publicityPanel.style.display = 'none';
+        body.innerHTML = items.map((item) => `
+          <tr>
+            <td>${escapeHtml(item.companyName)}</td>
+            <td>${escapeHtml(item.company)}</td>
+            <td>${escapeHtml(item.email)}</td>
+            <td>${escapeHtml(item.type)}</td>
+            <td>${escapeHtml(item.message)}</td>
+            <td>${escapeHtml(formatDate(item.createdAt))}</td>
+            <td><button class="mini-btn danger" data-action="delete-publicity" data-id="${item.id}">Supprimer</button></td>
+          </tr>
+        `).join('');
+      }
+
+      function renderDashboard() {
+        if (!state.data) return;
+
+        document.getElementById('articleCount').textContent = state.data.counts?.articles ?? 0;
+        document.getElementById('contactCount').textContent = state.data.counts?.contacts ?? 0;
+        document.getElementById('publicityCount').textContent = state.data.counts?.publicity ?? 0;
+
+        renderArticleRows(state.data.articles || []);
+        renderContactRows(state.data.contacts || []);
+        renderPublicityRows(state.data.publicity || []);
+      }
+
+      async function loadAdminData() {
+        try {
+          const response = await fetch('/api/admin/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: state.password })
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || 'Erreur de connexion.');
+          }
+
+          state.data = result;
+          renderDashboard();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      async function unlockAdmin() {
+        const password = adminPassword.value.trim();
+
+        try {
+          const response = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || 'Mot de passe incorrect.');
+          }
+
+          state.password = password;
+          authBox.classList.add('hidden');
+          adminContent.classList.remove('hidden');
+          await loadAdminData();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      async function handleAction(event) {
+        const button = event.target.closest('button[data-action]');
+        if (!button) return;
+
+        const { action, id } = button.dataset;
+
+        try {
+          if (action === 'toggle-article') {
+            const article = (state.data.articles || []).find((item) => item.id === id);
+            const nextStatus = article && article.status === 'published' ? 'pending' : 'published';
+            await callAdminAction(`/api/admin/articles/${id}/status`, { status: nextStatus });
+          }
+
+          if (action === 'delete-article') {
+            await callAdminAction(`/api/admin/articles/${id}/delete`, {});
+          }
+
+          if (action === 'delete-contact') {
+            await callAdminAction(`/api/admin/contacts/${id}/delete`, {});
+          }
+
+          if (action === 'delete-publicity') {
+            await callAdminAction(`/api/admin/publicity/${id}/delete`, {});
+          }
+
+          await loadAdminData();
+        } catch (error) {
+          alert(error.message);
+        }
+      }
+
+      document.addEventListener('click', handleAction);
+      unlockBtn.addEventListener('click', unlockAdmin);
+      adminPassword.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') unlockAdmin();
+      });
+    </script>
+  </body>
+</html>

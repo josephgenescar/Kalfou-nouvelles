@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Soumettre un article | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #171717;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+        --green: #14734d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { width: min(980px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #111111;
+        color: #d7d7d7;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-weight: 900;
+        letter-spacing: -1px;
+        font-size: clamp(28px, 4vw, 44px);
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        letter-spacing: .1em;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      main { padding: 36px 0 60px; }
+      .form-shell {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 28px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 4vw, 42px);
+      }
+      .intro {
+        margin: 0 0 22px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      label {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+      }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #faf9f7;
+        padding: 12px 14px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+      .full { grid-column: 1 / -1; }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      button {
+        border: none;
+        background: var(--red);
+        color: white;
+        padding: 12px 18px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .secondary {
+        background: var(--blue);
+      }
+      .success {
+        margin-top: 18px;
+        background: #edf9f1;
+        border: 1px solid rgba(20,115,77,.25);
+        color: var(--green);
+        padding: 12px 14px;
+        display: none;
+      }
+      .success.visible { display: block; }
+      footer {
+        background: #101010;
+        color: #d8d8d8;
+        padding: 22px 0;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        flex-wrap: wrap;
+      }
+      @media (max-width: 740px) {
+        .grid { grid-template-columns: 1fr; }
+        .nav-wrap, .topbar-inner, .footer-inner { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="article.html">Politique</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="form-shell">
+          <h1>Soumettre un article</h1>
+          <p class="intro">Partagez une information, un essai ou une analyse avec l’équipe de Kalfou Nouvelles. Les contenus pertinents sont évalués par notre rédaction.</p>
+
+          <form id="articleForm">
+            <div class="grid">
+              <div class="field">
+                <label for="author">Nom</label>
+                <input id="author" name="author" type="text" placeholder="Votre nom complet" required />
+              </div>
+
+              <div class="field">
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" placeholder="votre@email.com" required />
+              </div>
+
+              <div class="field full">
+                <label for="title">Titre de l’article</label>
+                <input id="title" name="title" type="text" placeholder="Titre de votre article" required />
+              </div>
+
+              <div class="field full">
+                <label for="category">Catégorie</label>
+                <select id="category" name="category">
+                  <option>Politique</option>
+                  <option>Économie</option>
+                  <option>Société</option>
+                  <option>Culture</option>
+                  <option>Sport</option>
+                  <option>Opinion</option>
+                </select>
+              </div>
+
+              <div class="field full">
+                <label for="summary">Résumé</label>
+                <textarea id="summary" name="summary" placeholder="Décrivez votre sujet en quelques lignes..." required></textarea>
+              </div>
+
+              <div class="field full">
+                <label for="content">Contenu</label>
+                <textarea id="content" name="content" placeholder="Saisissez le contenu détaillé de votre article..." required></textarea>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit">Envoyer</button>
+              <a class="secondary" href="contact.html" style="display:inline-flex; align-items:center; justify-content:center; padding:12px 18px; color:white; font-weight:800; letter-spacing:.08em; text-transform:uppercase;">Contact</a>
+            </div>
+
+            <div class="success" id="successMessage">Votre article a bien été reçu. Notre équipe le vérifiera prochainement.</div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        <div>© 2026 Kalfou Nouvelles</div>
+      </div>
+    </footer>
+
+    <script>
+      const form = document.getElementById('articleForm');
+      const successMessage = document.getElementById('successMessage');
+
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const payload = {
+          author: formData.get('author'),
+          email: formData.get('email'),
+          title: formData.get('title'),
+          category: formData.get('category'),
+          summary: formData.get('summary'),
+          content: formData.get('content')
+        };
+
+        try {
+          const response = await fetch('/api/articles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || 'Erreur lors de l\'envoi.');
+          }
+
+          form.reset();
+          successMessage.textContent = result.message || 'Votre article a bien été reçu.';
+          successMessage.classList.add('visible');
+        } catch (error) {
+          successMessage.textContent = error.message;
+          successMessage.classList.add('visible');
+          successMessage.style.background = '#fff3f3';
+          successMessage.style.borderColor = 'rgba(216,43,43,.25)';
+          successMessage.style.color = '#a51d1d';
+        }
+      });
+    </script>
+  </body>
+</html>

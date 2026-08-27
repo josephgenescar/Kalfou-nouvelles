@@ -1,0 +1,65 @@
+{
+  "articles": [
+    {
+      "id": "published-demo-1",
+      "author": "Rédaction",
+      "email": "redaction@kalfou.ht",
+      "title": "Le dialogue national reprend avec des solutions concrètes",
+      "category": "Politique",
+      "summary": "Les acteurs du pays relancent le débat sur la gouvernance et la stabilité.",
+      "content": "Contenu de test pour publication publique.",
+      "status": "published",
+      "createdAt": "2026-08-27T02:45:58.344Z"
+    },
+    {
+      "id": "published-demo-2",
+      "author": "Nadège",
+      "email": "nadge@kalfou.ht",
+      "title": "Les marchés appellent à plus de stabilité sur le terrain",
+      "category": "Économie",
+      "summary": "Le commerce local demande des mesures visibles pour calmer les prix et sécuriser les échanges.",
+      "content": "Contenu de test 2.",
+      "status": "published",
+      "createdAt": "2026-08-27T02:45:58.344Z"
+    },
+    {
+      "id": "published-demo-3",
+      "author": "Claudette",
+      "email": "claudette@kalfou.ht",
+      "title": "L’artiste local relance la culture dans les quartiers",
+      "category": "Culture",
+      "summary": "Les jeunes artistes investissent les espaces publics et reformulent la culture locale.",
+      "content": "Contenu de test 3.",
+      "status": "published",
+      "createdAt": "2026-08-27T02:45:58.344Z"
+    }
+  ],
+  "contacts": [
+    {
+      "name": "Test",
+      "email": "test@kalfou.ht",
+      "subject": "Verification",
+      "message": "Vérification API",
+      "createdAt": "2026-08-27T02:39:14.310Z"
+    },
+    {
+      "id": "demo-contact-1",
+      "name": "Contact Test",
+      "email": "contact@kalfou.ht",
+      "subject": "Test",
+      "message": "Message de test",
+      "createdAt": "2026-08-27T02:44:05.999Z"
+    }
+  ],
+  "publicity": [
+    {
+      "id": "demo-publicity-1",
+      "companyName": "Entreprise Test",
+      "company": "Kalfou Labs",
+      "email": "promo@kalfou.ht",
+      "type": "Banner",
+      "message": "Demande de test",
+      "createdAt": "2026-08-27T02:44:05.999Z"
+    }
+  ]
+}

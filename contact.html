@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contact | Kalfou Nouvelles</title>
+    <style>
+      :root {
+        --bg: #f5f2ee;
+        --paper: #ffffff;
+        --ink: #171717;
+        --muted: #5f5f5f;
+        --line: #e8e1d8;
+        --red: #d82b2b;
+        --blue: #1a4f9d;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.6;
+      }
+      a { text-decoration: none; color: inherit; }
+      .container { width: min(980px, calc(100% - 28px)); margin: 0 auto; }
+      header {
+        background: var(--paper);
+        border-bottom: 3px solid var(--red);
+      }
+      .topbar {
+        background: #101010;
+        color: #d8d8d8;
+        font-size: 12px;
+      }
+      .topbar-inner {
+        min-height: 38px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .nav-wrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 0;
+      }
+      .brand {
+        font-size: clamp(30px, 4vw, 44px);
+        font-weight: 900;
+        letter-spacing: -1px;
+      }
+      .brand span { color: var(--red); }
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      main {
+        padding: 36px 0 60px;
+      }
+      .contact-box {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        padding: 28px;
+      }
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(30px, 4vw, 42px);
+      }
+      .intro {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      label {
+        font-weight: 700;
+        font-size: 13px;
+      }
+      input, textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        background: #faf9f7;
+        padding: 12px 14px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 160px;
+        resize: vertical;
+      }
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+      button {
+        background: var(--red);
+        border: none;
+        color: white;
+        padding: 12px 18px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+      .whatsapp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #25d366;
+        color: white;
+        border: none;
+        padding: 12px 18px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        text-decoration: none;
+      }
+      footer {
+        background: #101010;
+        color: #d5d5d5;
+        padding: 22px 0;
+      }
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      @media (max-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .nav-wrap,
+        .topbar-inner,
+        .footer-inner {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <div class="container topbar-inner">
+          <span>Mardi, 26 août 2026</span>
+          <span>Port-au-Prince • 31°C</span>
+        </div>
+      </div>
+      <div class="container nav-wrap">
+        <div class="brand">KALFOU <span>NOUVELLES</span></div>
+        <nav class="nav">
+          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="article.html">Politique</a>
+          <a href="about.html">À propos</a>
+          <a href="publicite.html">Publicité</a>
+          <a href="soumettre.html">Soumettre</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="container">
+        <div class="contact-box">
+          <h1>Contactez-nous</h1>
+          <p class="intro">Vous avez une information, une opinion ou une histoire à partager ? Écrivez-nous, nous serons ravis de vous lire.</p>
+
+          <form id="contactForm">
+            <div class="grid">
+              <div class="field">
+                <label for="name">Nom</label>
+                <input id="name" name="name" type="text" placeholder="Votre nom" required />
+              </div>
+              <div class="field">
+                <label for="email">E-mail</label>
+                <input id="email" name="email" type="email" placeholder="Votre e-mail" required />
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="subject">Sujet</label>
+                <input id="subject" name="subject" type="text" placeholder="Objet du message" required />
+              </div>
+              <div class="field" style="grid-column: 1 / -1;">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Écrivez votre message..." required></textarea>
+              </div>
+            </div>
+
+            <div class="cta-row">
+              <button type="submit">Envoyer</button>
+              <a class="whatsapp-btn" href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20vous%20contacter." target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+            <div id="contactSuccess" style="display:none; margin-top:18px; padding:12px 14px; background:#edf9f1; border:1px solid rgba(20,115,77,.25); color:#14734d; font-weight:700;">Votre message a bien été enregistré.</div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div class="brand" style="font-size:20px; color:white;">KALFOU <span>NOUVELLES</span></div>
+        <div>© 2026 Kalfou Nouvelles</div>
+      </div>
+    </footer>
+
+    <script>
+      const contactForm = document.getElementById('contactForm');
+      const contactSuccess = document.getElementById('contactSuccess');
+
+      contactForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+
+        const formData = new FormData(contactForm);
+        const payload = {
+          name: formData.get('name'),
+          email: formData.get('email'),
+          subject: formData.get('subject'),
+          message: formData.get('message')
+        };
+
+        try {
+          const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          if (!response.ok) {
+            throw new Error(result.message || 'Erreur lors de l\'envoi.');
+          }
+
+          contactForm.reset();
+          contactSuccess.textContent = result.message || 'Votre message a bien été enregistré.';
+          contactSuccess.style.display = 'block';
+        } catch (error) {
+          contactSuccess.textContent = error.message;
+          contactSuccess.style.display = 'block';
+          contactSuccess.style.background = '#fff3f3';
+          contactSuccess.style.borderColor = 'rgba(216,43,43,.25)';
+          contactSuccess.style.color = '#a51d1d';
+        }
+      });
+    </script>
+  </body>
+</html>

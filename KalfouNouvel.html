@@ -1031,6 +1031,7 @@
       </div>
     </footer>
 
+    <script src="supabase-config.js"></script>
     <script>
       const translations = {
         fr: {
@@ -1260,15 +1261,37 @@
       async function loadPublishedArticles() {
         try {
           const response = await fetch('/api/public/articles');
-          const result = await response.json();
-          if (!response.ok || !Array.isArray(result.articles) || !result.articles.length) {
-            return;
+          if (!response.ok || !(response.headers.get('content-type') || '').includes('application/json')) {
+            throw new Error('Backend Express indisponib sou Netlify.');
           }
+          const result = await response.json();
+          if (!Array.isArray(result.articles) || !result.articles.length) return;
+          renderPublishedArticles(result.articles);
+        } catch (error) {
+          try {
+            const config = window.SUPABASE_CONFIG;
+            if (!config) return;
+            const response = await fetch(`${config.url}/rest/v1/articles?select=id,author,email,title,category,summary,content,status,created_at&status=eq.published&order=created_at.desc`, {
+              headers: {
+                apikey: config.anonKey,
+                Authorization: `Bearer ${config.anonKey}`
+              }
+            });
+            if (!response.ok) return;
+            const rows = await response.json();
+            if (!Array.isArray(rows) || !rows.length) return;
+            renderPublishedArticles(rows.map((article) => ({ ...article, createdAt: article.created_at })));
+          } catch (supabaseError) {
+            console.error('Unable to load published articles:', supabaseError);
+          }
+        }
+      }
 
+      function renderPublishedArticles(articles) {
           const cardsContainer = document.querySelector('.cards');
           if (!cardsContainer) return;
 
-          const featured = result.articles[0];
+          const featured = articles[0];
           const heroTag = document.querySelector('.hero-tag');
           const heroTitle = document.querySelector('.hero-feature h1');
           const heroText = document.querySelector('.hero-feature p');
@@ -1289,7 +1312,7 @@
           }
 
           const fragment = document.createDocumentFragment();
-          result.articles.slice(1, 5).forEach((item, index) => {
+          articles.slice(1, 5).forEach((item, index) => {
             const articleLink = document.createElement('a');
             articleLink.href = `article.html?id=${encodeURIComponent(item.id)}`;
             articleLink.style.display = 'block';
@@ -1329,9 +1352,6 @@
 
           cardsContainer.innerHTML = '';
           cardsContainer.appendChild(fragment);
-        } catch (error) {
-          console.error('Unable to load published articles:', error);
-        }
       }
 
       function formatDisplayDate(value) {

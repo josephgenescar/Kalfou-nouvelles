@@ -637,6 +637,18 @@
         border: 1px solid var(--line);
         background: var(--paper);
       }
+      .publicity-live.banner-placement {
+        margin: 0 0 28px;
+        border-top: 4px solid var(--red);
+      }
+      .publicity-live.sponsored-placement {
+        margin: 24px 0 0;
+        border-left: 4px solid var(--gold);
+      }
+      .publicity-live.newsletter-placement {
+        margin: 26px 0 0;
+        border-top: 4px solid var(--blue);
+      }
       .publicity-live img {
         display: block;
         width: 100%;
@@ -1418,9 +1430,20 @@
           if (!section || !image || !title || !text) return;
           const imageUrl = campaign.image_url || campaign.imageUrl;
           const safeUrl = encodeURI(imageUrl);
+          const type = String(campaign.type || 'Banner');
+          const placementClass = type === 'Article sponsorisé' ? 'sponsored-placement' : type === 'Newsletter' ? 'newsletter-placement' : 'banner-placement';
           image.innerHTML = `<img src="${safeUrl}" alt="Publicité de ${campaign.company || 'notre partenaire'}" />`;
           title.textContent = campaign.company || 'Notre partenaire';
           text.textContent = campaign.message || '';
+          section.classList.remove('banner-placement', 'sponsored-placement', 'newsletter-placement');
+          section.classList.add(placementClass);
+          if (type === 'Article sponsorisé') {
+            document.querySelector('.cards')?.insertAdjacentElement('afterend', section);
+          } else if (type === 'Newsletter') {
+            document.querySelector('.newsletter')?.insertAdjacentElement('beforebegin', section);
+          } else {
+            document.querySelector('main > .container')?.prepend(section);
+          }
           section.style.display = 'block';
         } catch (error) {
           console.error('Unable to load published publicity:', error);

@@ -98,14 +98,17 @@
         justify-content: space-between;
         gap: 18px;
         padding: 20px 0;
-        min-height: 250px;
+        min-height: 210px;
         position: relative;
         isolation: isolate;
         overflow: hidden;
       }
       .header-slider {
         position: absolute;
-        inset: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 42%;
         z-index: -1;
         background: #183452;
       }
@@ -114,7 +117,7 @@
         inset: 0;
         display: flex;
         align-items: flex-end;
-        padding: 20px;
+        padding: 18px 22px;
         color: #fff;
         opacity: 0;
         background-size: cover;
@@ -130,8 +133,8 @@
       .header-slide.active { opacity: 1; }
       .header-slide-content {
         position: relative;
-        max-width: 570px;
-        margin-top: 95px;
+        max-width: 470px;
+        margin: 0 0 0 auto;
       }
       .header-slide-content strong {
         color: #ffd34f;
@@ -160,6 +163,7 @@
         line-height: 1;
         position: relative;
         z-index: 2;
+        flex: 0 1 36%;
         background: rgba(255, 255, 255, .9);
         padding: 14px 16px;
         backdrop-filter: blur(5px);
@@ -782,9 +786,15 @@
         .header-inner {
           flex-direction: column;
           align-items: flex-start;
-          min-height: 290px;
+          min-height: 390px;
           justify-content: flex-start;
         }
+        .header-slider {
+          top: 170px;
+          left: 0;
+          min-height: 200px;
+        }
+        .brand { flex-basis: auto; }
         .brand-text {
           font-size: 28px;
         }
@@ -820,7 +830,7 @@
           min-width: 0;
         }
         .header-slide { padding: 16px 14px; }
-        .header-slide-content { margin-top: 155px; }
+        .header-slide-content { margin: 0; }
         .search-box {
           border-radius: 12px;
         }

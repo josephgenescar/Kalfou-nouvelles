@@ -22,6 +22,7 @@
       html { scroll-behavior: smooth; }
       body {
         margin: 0;
+        overflow-x: hidden;
         font-family: Arial, Helvetica, sans-serif;
         background:
           radial-gradient(circle at top, rgba(216, 43, 43, 0.06), transparent 30%),
@@ -633,23 +634,24 @@
       }
       .publicity-live {
         display: none;
-        margin-top: 30px;
+        position: relative;
+        margin: 30px auto;
+        width: min(1120px, calc(100% - 28px));
+        overflow: hidden;
         border: 1px solid var(--line);
         background: var(--paper);
       }
-      .publicity-live.banner-placement {
-        margin: 0 0 28px;
-        border-top: 4px solid var(--red);
+      .publicity-slides {
+        position: relative;
+        min-height: 190px;
       }
-      .publicity-live.sponsored-placement {
-        margin: 24px 0 0;
-        border-left: 4px solid var(--gold);
+      .publicity-slide {
+        display: none;
       }
-      .publicity-live.newsletter-placement {
-        margin: 26px 0 0;
-        border-top: 4px solid var(--blue);
+      .publicity-slide.active {
+        display: block;
       }
-      .publicity-live img {
+      .publicity-slide img {
         display: block;
         width: 100%;
         max-height: 230px;
@@ -798,12 +800,14 @@
         .header-inner {
           flex-direction: column;
           align-items: flex-start;
-          height: 300px;
+          height: auto;
           justify-content: flex-start;
         }
         .header-slider {
-          top: 135px;
-          left: 0;
+          position: relative;
+          top: auto;
+          left: auto;
+          width: 100%;
           height: 165px;
         }
         .brand { flex-basis: auto; }
@@ -822,6 +826,10 @@
           align-items: flex-start;
           gap: 12px 18px;
           padding: 12px 0 18px;
+        }
+        .ticker-inner {
+          width: max-content;
+          min-width: 100%;
         }
         .nav-inner.open {
           display: flex;
@@ -845,6 +853,20 @@
         .header-slide-content { margin: 0; }
         .search-box {
           border-radius: 12px;
+        }
+        .hero-feature,
+        .side-column,
+        .card,
+        .analysis,
+        .opinion,
+        .newsletter,
+        .cta,
+        .feature-box {
+          min-width: 0;
+        }
+        .hero-image {
+          height: min(355px, 58vw);
+          min-height: 190px;
         }
         .footer-grid { grid-template-columns: 1fr; }
       }
@@ -899,7 +921,7 @@
     </header>
 
     <nav>
-      <div class="container nav-inner open">
+      <div class="container nav-inner">
         <a href="KalfouNouvel.html" class="active" data-i18n="nav_home">Accueil</a>
         <a href="article.html" data-i18n="nav_politique">Politique</a>
         <a href="article.html" data-i18n="nav_economie">Économie</a>
@@ -1105,14 +1127,9 @@
           <p id="newsletterMessage" aria-live="polite"></p>
         </section>
       </div>
-        <section id="publicityLive" class="publicity-live" aria-label="Publicité">
-          <div id="publicityLiveImage"></div>
-          <div class="publicity-live-copy">
-            <strong>Publicité</strong>
-            <h2 id="publicityLiveTitle"></h2>
-            <p id="publicityLiveText"></p>
-          </div>
-        </section>
+      <section id="publicityLive" class="publicity-live" aria-label="Publicité">
+        <div id="publicitySlides" class="publicity-slides"></div>
+      </section>
     </main>
 
     <footer>
@@ -1144,7 +1161,6 @@
             <a href="#">Instagram</a>
             <a href="#">X / Twitter</a>
             <a href="#">YouTube</a>
-            <a class="whatsapp-link" href="https://wa.me/50948868964?text=Bonjour%20Kalfou%20Nouvelles%2C%20je%20souhaite%20vous%20contacter." target="_blank" rel="noopener">WhatsApp</a>
             <a class="whatsapp-link" href="https://whatsapp.com/channel/0029Vb8PdkXATRSec1zorX1Q" target="_blank" rel="noopener">Abonnez-vous au Channel WhatsApp</a>
           </div>
 
@@ -1420,31 +1436,43 @@
           const response = await fetch('/api/public/publicity');
           if (!response.ok) return;
           const result = await response.json();
-          const campaign = result.publicity?.find((item) => item.image_url || item.imageUrl);
-          if (!campaign) return;
-
+          const campaigns = Array.isArray(result.publicity) ? result.publicity : [];
           const section = document.getElementById('publicityLive');
-          const image = document.getElementById('publicityLiveImage');
-          const title = document.getElementById('publicityLiveTitle');
-          const text = document.getElementById('publicityLiveText');
-          if (!section || !image || !title || !text) return;
-          const imageUrl = campaign.image_url || campaign.imageUrl;
-          const safeUrl = encodeURI(imageUrl);
-          const type = String(campaign.type || 'Banner');
-          const placementClass = type === 'Article sponsorisé' ? 'sponsored-placement' : type === 'Newsletter' ? 'newsletter-placement' : 'banner-placement';
-          image.innerHTML = `<img src="${safeUrl}" alt="Publicité de ${campaign.company || 'notre partenaire'}" />`;
-          title.textContent = campaign.company || 'Notre partenaire';
-          text.textContent = campaign.message || '';
-          section.classList.remove('banner-placement', 'sponsored-placement', 'newsletter-placement');
-          section.classList.add(placementClass);
-          if (type === 'Article sponsorisé') {
-            document.querySelector('.cards')?.insertAdjacentElement('afterend', section);
-          } else if (type === 'Newsletter') {
-            document.querySelector('.newsletter')?.insertAdjacentElement('beforebegin', section);
-          } else {
-            document.querySelector('main > .container')?.prepend(section);
-          }
+          const slides = document.getElementById('publicitySlides');
+          if (!section || !slides || !campaigns.length) return;
+          campaigns.forEach((campaign, index) => {
+            const slide = document.createElement('article');
+            slide.className = `publicity-slide${index === 0 ? ' active' : ''}`;
+            const imageUrl = campaign.image_url || campaign.imageUrl;
+            if (imageUrl) {
+              const image = document.createElement('img');
+              image.src = imageUrl;
+              image.alt = `Publicité de ${campaign.company || 'notre partenaire'}`;
+              slide.appendChild(image);
+            }
+            const copy = document.createElement('div');
+            copy.className = 'publicity-live-copy';
+            const type = document.createElement('strong');
+            type.textContent = campaign.type || 'Banner';
+            const title = document.createElement('h2');
+            title.textContent = campaign.company || 'Notre partenaire';
+            const text = document.createElement('p');
+            text.textContent = campaign.message || '';
+            copy.append(type, title, text);
+            slide.appendChild(copy);
+            slides.appendChild(slide);
+          });
+          document.querySelector('main')?.appendChild(section);
           section.style.display = 'block';
+          const slideItems = slides.querySelectorAll('.publicity-slide');
+          if (slideItems.length > 1) {
+            let activeSlide = 0;
+            window.setInterval(() => {
+              slideItems[activeSlide].classList.remove('active');
+              activeSlide = (activeSlide + 1) % slideItems.length;
+              slideItems[activeSlide].classList.add('active');
+            }, 5000);
+          }
         } catch (error) {
           console.error('Unable to load published publicity:', error);
         }

@@ -3,7 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kalfou Nouvelles</title>
+    <meta name="description" content="Kalfou Nouvelles: actualités d'Haïti, politique, économie, société, culture, sport et opinion." />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://kalfou-nouvelles.netlify.app/KalfouNouvel.html" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Kalfou Nouvelles | Actualités d'Haïti" />
+    <meta property="og:description" content="L'actualité haïtienne expliquée simplement: faits, analyse et opinion." />
+    <meta property="og:url" content="https://kalfou-nouvelles.netlify.app/KalfouNouvel.html" />
+    <meta property="og:image" content="https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png" />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preload" as="image" href="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1200&q=70" />
+    <title>Kalfou Nouvelles | Actualités d'Haïti</title>
+    <script type="application/ld+json">
+      {"@context":"https://schema.org","@type":"NewsMediaOrganization","name":"Kalfou Nouvelles","url":"https://kalfou-nouvelles.netlify.app/","logo":"https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png","description":"Actualités d'Haïti, analyse et opinion."}
+    </script>
     <style>
       :root {
         --bg: #f5f2ee;
@@ -52,6 +65,16 @@
       .cta,
       .feature-box {
         border-radius: 0;
+      .side-column,
+      .cards,
+      .two-columns,
+      .feature-box,
+      .cta,
+      .newsletter,
+      footer {
+        content-visibility: auto;
+        contain-intrinsic-size: 0 400px;
+      }
       }
 
       .topbar {

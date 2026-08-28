@@ -98,6 +98,51 @@
         justify-content: space-between;
         gap: 18px;
         padding: 20px 0;
+        min-height: 300px;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+      }
+      .header-slider {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: #183452;
+      }
+      .header-slide {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        padding: 28px;
+        color: #fff;
+        opacity: 0;
+        background-size: cover;
+        background-position: center;
+        transition: opacity .7s ease;
+      }
+      .header-slide::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, rgba(9, 24, 41, .8), rgba(9, 24, 41, .25) 65%, rgba(9, 24, 41, .55));
+      }
+      .header-slide.active { opacity: 1; }
+      .header-slide-content {
+        position: relative;
+        max-width: 570px;
+        margin-top: 130px;
+      }
+      .header-slide-content strong {
+        color: #ffd34f;
+        font-size: 11px;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+      }
+      .header-slide-content h2 {
+        margin: 7px 0 0;
+        font-size: clamp(22px, 3vw, 38px);
+        line-height: 1.08;
       }
       .menu-toggle {
         display: none;
@@ -113,6 +158,11 @@
       }
       .brand {
         line-height: 1;
+        position: relative;
+        z-index: 2;
+        background: rgba(255, 255, 255, .9);
+        padding: 14px 16px;
+        backdrop-filter: blur(5px);
       }
       .site-logo {
         display: block;
@@ -139,9 +189,12 @@
         align-items: center;
         gap: 8px;
         border: 1px solid var(--line);
-        background: #faf7f4;
+        background: rgba(250, 247, 244, .76);
         padding: 9px 12px;
         border-radius: 999px;
+        position: relative;
+        z-index: 2;
+        backdrop-filter: blur(5px);
       }
       .search-box input {
         width: 100%;
@@ -729,6 +782,8 @@
         .header-inner {
           flex-direction: column;
           align-items: flex-start;
+          min-height: 360px;
+          justify-content: flex-start;
         }
         .brand-text {
           font-size: 28px;
@@ -764,6 +819,8 @@
           width: 100%;
           min-width: 0;
         }
+        .header-slide { padding: 20px 14px; }
+        .header-slide-content { margin-top: 210px; }
         .search-box {
           border-radius: 12px;
         }
@@ -787,6 +844,26 @@
 
     <header>
       <div class="container header-inner">
+        <div class="header-slider" aria-label="À la une">
+          <div class="header-slide active" style="background-image:url('https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=1600&q=85');">
+            <div class="header-slide-content">
+              <strong>À la une</strong>
+              <h2>Les voix d’Haïti au cœur de l’actualité</h2>
+            </div>
+          </div>
+          <div class="header-slide" style="background-image:url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1600&q=85');">
+            <div class="header-slide-content">
+              <strong>Analyse</strong>
+              <h2>Comprendre les faits, au-delà des gros titres</h2>
+            </div>
+          </div>
+          <div class="header-slide" style="background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=85');">
+            <div class="header-slide-content">
+              <strong>Partenaire</strong>
+              <h2>Votre marque dans un espace média crédible</h2>
+            </div>
+          </div>
+        </div>
         <div class="brand">
           <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
           <div class="brand-tag" data-i18n="tagline">Actualités • Analyse • Opinion</div>
@@ -1283,6 +1360,16 @@
 
       const navInner = document.querySelector('.nav-inner');
       const menuToggle = document.querySelector('.menu-toggle');
+
+      const headerSlides = document.querySelectorAll('.header-slide');
+      let activeHeaderSlide = 0;
+      if (headerSlides.length > 1) {
+        window.setInterval(() => {
+          headerSlides[activeHeaderSlide].classList.remove('active');
+          activeHeaderSlide = (activeHeaderSlide + 1) % headerSlides.length;
+          headerSlides[activeHeaderSlide].classList.add('active');
+        }, 5000);
+      }
 
       if (menuToggle && navInner) {
         menuToggle.addEventListener('click', () => {

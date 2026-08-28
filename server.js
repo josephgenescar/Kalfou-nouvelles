@@ -13,6 +13,8 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'publicity-images';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
+const CONTACT_NOTIFICATION_EMAIL = process.env.CONTACT_NOTIFICATION_EMAIL;
+const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
@@ -67,6 +69,34 @@ async function uploadPublicityImage(file) {
   });
   if (!response.ok) throw new Error('Imaj publicité a pa ka upload nan Supabase.');
   return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${filePath}`;
+}
+
+async function sendContactNotification(contact) {
+  if (!BREVO_API_KEY || !CONTACT_NOTIFICATION_EMAIL || !BREVO_SENDER_EMAIL) {
+    return false;
+  }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': BREVO_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: 'Kalfou Nouvelles', email: BREVO_SENDER_EMAIL },
+      to: [{ email: CONTACT_NOTIFICATION_EMAIL }],
+      replyTo: { email: contact.email, name: contact.name },
+      subject: `Nouveau message: ${contact.subject}`,
+      textContent: `Nom: ${contact.name}\nEmail: ${contact.email}\nSujet: ${contact.subject}\n\n${contact.message}`
+    })
+  });
+
+  if (!response.ok) {
+    console.error('Brevo contact notification failed:', await response.text());
+    return false;
+  }
+  return true;
 }
 
 function mapArticle(row) {
@@ -149,12 +179,14 @@ app.post('/api/contact', async (req, res) => {
   if (!name || !email || !subject || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
   if (!requireSupabase(res)) return;
   try {
+    const contact = { name: String(name).trim(), email: String(email).trim(), subject: String(subject).trim(), message: String(message).trim() };
     await supabaseRequest('contacts', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ name: String(name).trim(), email: String(email).trim(), subject: String(subject).trim(), message: String(message).trim() })
+      body: JSON.stringify(contact)
     });
-    res.status(201).json({ ok: true, message: 'Message enregistré avec succès.' });
+    const notificationSent = await sendContactNotification(contact);
+    res.status(201).json({ ok: true, message: notificationSent ? 'Message enregistré et notification envoyée.' : 'Message enregistré avec succès.' });
   } catch (error) { handleServerError(res, error); }
 });
 
@@ -303,6 +335,22 @@ app.post('/api/admin/publicity/:id/status', async (req, res) => {
     const rows = await supabaseRequest(`publicity?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
     if (!rows.length) return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
     res.json({ ok: true, publicity: mapPublicity(rows[0]) });
+  } catch (error) { handleServerError(res, error); }
+});
+
+app.post('/api/admin/publicity/:id/update', async (req, res) => {
+  const { password, companyName, company, email, type, message } = req.body || {};
+  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
+  if (!requireSupabase(res)) return;
+  try {
+    const rows = await supabaseRequest(`publicity?id=eq.${encodeURIComponent(req.params.id)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim() })
+    });
+    if (!rows.length) return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
+    res.json({ ok: true, publicity: mapPublicity(rows[0]), message: 'Demande modifiée avec succès.' });
   } catch (error) { handleServerError(res, error); }
 });
 

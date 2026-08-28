@@ -171,6 +171,22 @@
         margin-bottom: 8px;
         border: 1px solid var(--line);
       }
+      .edit-publicity {
+        display: none;
+        margin: 10px 0;
+        padding: 12px;
+        background: #faf8f5;
+        border: 1px solid var(--line);
+      }
+      .edit-publicity input,
+      .edit-publicity select,
+      .edit-publicity textarea {
+        width: 100%;
+        margin: 4px 0 8px;
+        padding: 8px;
+        border: 1px solid var(--line);
+        font: inherit;
+      }
       footer {
         background: #101010;
         color: #d7d7d7;
@@ -458,6 +474,17 @@
             <td>${escapeHtml(formatDate(item.createdAt))}</td>
               <td>
                 ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener"><img class="publicity-preview" src="${escapeHtml(item.image_url)}" alt="Image de la publicité" /></a>` : '<span class="empty">Sans image</span>'}
+                <button class="mini-btn" data-action="edit-publicity" data-id="${item.id}">Modifier</button>
+                <div class="edit-publicity" id="edit-publicity-${item.id}">
+                  <input data-edit-field="companyName" value="${escapeHtml(item.companyName)}" placeholder="Nom" />
+                  <input data-edit-field="company" value="${escapeHtml(item.company)}" placeholder="Entreprise" />
+                  <input data-edit-field="email" type="email" value="${escapeHtml(item.email)}" placeholder="E-mail" />
+                  <select data-edit-field="type">
+                    ${['Banner', 'Article sponsorisé', 'Newsletter', 'Partenariat global'].map((type) => `<option ${item.type === type ? 'selected' : ''}>${type}</option>`).join('')}
+                  </select>
+                  <textarea data-edit-field="message" rows="4" placeholder="Message">${escapeHtml(item.message)}</textarea>
+                  <button class="mini-btn primary" data-action="save-publicity" data-id="${item.id}">Enregistrer</button>
+                </div>
                 <button class="mini-btn primary" data-action="toggle-publicity" data-id="${item.id}">${item.status === 'published' ? 'Retirer' : 'Publier'}</button>
                 <button class="mini-btn danger" data-action="delete-publicity" data-id="${item.id}">Supprimer</button>
               </td>
@@ -550,6 +577,18 @@
             const publicity = (state.data.publicity || []).find((item) => item.id === id);
             const nextStatus = publicity && publicity.status === 'published' ? 'pending' : 'published';
             await callAdminAction(`/api/admin/publicity/${id}/status`, { status: nextStatus });
+          }
+
+          if (action === 'edit-publicity') {
+            const editor = document.getElementById(`edit-publicity-${id}`);
+            if (editor) editor.style.display = editor.style.display === 'block' ? 'none' : 'block';
+            return;
+          }
+
+          if (action === 'save-publicity') {
+            const editor = document.getElementById(`edit-publicity-${id}`);
+            const payload = Object.fromEntries([...editor.querySelectorAll('[data-edit-field]')].map((field) => [field.dataset.editField, field.value]));
+            await callAdminAction(`/api/admin/publicity/${id}/update`, payload);
           }
 
           await loadAdminData();

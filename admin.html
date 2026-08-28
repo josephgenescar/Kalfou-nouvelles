@@ -171,6 +171,14 @@
         margin-bottom: 8px;
         border: 1px solid var(--line);
       }
+      .article-preview {
+        display: block;
+        width: 120px;
+        height: 70px;
+        object-fit: cover;
+        margin-bottom: 8px;
+        border: 1px solid var(--line);
+      }
       .edit-publicity {
         display: none;
         margin: 10px 0;
@@ -416,6 +424,7 @@
               <td>${escapeHtml(status)}</td>
               <td>${escapeHtml(formatDate(item.createdAt))}</td>
               <td>
+                ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener"><img class="article-preview" src="${escapeHtml(item.image_url)}" alt="Image de l’article" /></a>` : '<span class="empty">Sans image</span>'}
                 <button class="mini-btn primary" data-action="toggle-article" data-id="${item.id}">${actionLabel}</button>
                 <button class="mini-btn danger" data-action="delete-article" data-id="${item.id}">Supprimer</button>
               </td>

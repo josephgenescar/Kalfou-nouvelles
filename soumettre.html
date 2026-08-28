@@ -214,6 +214,11 @@
                 <label for="content">Contenu</label>
                 <textarea id="content" name="content" placeholder="Saisissez le contenu détaillé de votre article..." required></textarea>
               </div>
+
+              <div class="field full">
+                <label for="image">Image de l’article (optionnelle, JPG, PNG, WEBP ou GIF, 5 Mo maximum)</label>
+                <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+              </div>
             </div>
 
             <div class="actions">
@@ -243,20 +248,10 @@
         event.preventDefault();
 
         const formData = new FormData(form);
-        const payload = {
-          author: formData.get('author'),
-          email: formData.get('email'),
-          title: formData.get('title'),
-          category: formData.get('category'),
-          summary: formData.get('summary'),
-          content: formData.get('content')
-        };
-
         try {
           const response = await fetch('/api/articles', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: formData
           });
 
           const result = await response.json();

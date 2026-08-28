@@ -265,7 +265,8 @@
         if (title) title.textContent = article.title;
         if (meta) meta.textContent = `Par ${article.author || 'Rédaction'} • ${formatDisplayDate(article.createdAt)} • ${article.category || 'Actualité'}`;
         if (hero) {
-          hero.style.backgroundImage = "linear-gradient(135deg, rgba(17,17,17,0.28), rgba(17,17,17,0.12)), url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80')";
+          const imageUrl = article.image_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80';
+          hero.style.backgroundImage = `linear-gradient(135deg, rgba(17,17,17,0.28), rgba(17,17,17,0.12)), url('${encodeURI(imageUrl)}')`;
         }
 
         if (body) {

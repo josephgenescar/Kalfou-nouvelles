@@ -11,6 +11,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'publicity-images';
+const SUPABASE_ARTICLE_BUCKET = process.env.SUPABASE_ARTICLE_BUCKET || 'article-images';
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
 const CONTACT_NOTIFICATION_EMAIL = process.env.CONTACT_NOTIFICATION_EMAIL;
@@ -54,10 +55,10 @@ async function supabaseRequest(table, options = {}) {
   return body;
 }
 
-async function uploadPublicityImage(file) {
+async function uploadImage(file, bucket) {
   const extension = file.originalname.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
   const filePath = `${Date.now()}-${randomUUID()}.${extension}`;
-  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${SUPABASE_STORAGE_BUCKET}/${filePath}`, {
+  const response = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${filePath}`, {
     method: 'POST',
     headers: {
       apikey: SUPABASE_SERVICE_ROLE_KEY,
@@ -68,7 +69,7 @@ async function uploadPublicityImage(file) {
     body: file.buffer
   });
   if (!response.ok) throw new Error('Imaj publicité a pa ka upload nan Supabase.');
-  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_STORAGE_BUCKET}/${filePath}`;
+  return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
 }
 
 async function sendContactNotification(contact) {
@@ -190,15 +191,16 @@ app.post('/api/contact', async (req, res) => {
   } catch (error) { handleServerError(res, error); }
 });
 
-app.post('/api/articles', async (req, res) => {
+app.post('/api/articles', upload.single('image'), async (req, res) => {
   const { author, email, title, category, summary, content } = req.body || {};
   if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (!requireSupabase(res)) return;
   try {
+    const imageUrl = req.file ? await uploadImage(req.file, SUPABASE_ARTICLE_BUCKET) : null;
     await supabaseRequest('articles', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), status: 'pending' })
+      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), image_url: imageUrl, status: 'pending' })
     });
     res.status(201).json({ ok: true, message: 'Article soumis avec succès.' });
   } catch (error) { handleServerError(res, error); }
@@ -225,7 +227,7 @@ app.post('/api/publicity', upload.single('image'), async (req, res) => {
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (!requireSupabase(res)) return;
   try {
-    const imageUrl = req.file ? await uploadPublicityImage(req.file) : null;
+    const imageUrl = req.file ? await uploadImage(req.file, SUPABASE_STORAGE_BUCKET) : null;
     await supabaseRequest('publicity', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },

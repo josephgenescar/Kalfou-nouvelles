@@ -93,6 +93,11 @@
         border: 1px solid var(--line);
         padding: 22px;
       }
+      .price-note {
+        margin: -12px 0 16px;
+        color: var(--muted);
+        font-size: 13px;
+      }
       .plan.highlight {
         border: 2px solid var(--red);
         background: #fff6f6;
@@ -217,6 +222,7 @@
         <div class="container topbar-inner">
           <span>Mardi, 26 août 2026</span>
           <span>Port-au-Prince • 31°C</span>
+          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">KR</button></span>
         </div>
       </div>
       <div class="container nav-wrap">
@@ -242,7 +248,8 @@
         <section class="pricing">
           <article class="plan">
             <h3>Starter</h3>
-            <div class="price">$150</div>
+            <div class="price">$30 – $50</div>
+            <div class="price-note">Prix de lancement • $75 – $150 avec un trafic établi</div>
             <p>Idéal pour une petite campagne visible rapidement sur la page d’accueil.</p>
             <ul>
               <li>Banner homepage</li>
@@ -255,7 +262,8 @@
 
           <article class="plan highlight">
             <h3>Premium</h3>
-            <div class="price">$350</div>
+            <div class="price">$75 – $125</div>
+            <div class="price-note">Prix de lancement • $150 – $350 avec un trafic établi</div>
             <p>Pour une visibilité renforcée avec bannière, article sponsorisé et newsletter.</p>
             <ul>
               <li>Placement homepage + sidebar</li>
@@ -269,6 +277,7 @@
           <article class="plan">
             <h3>Partenariat</h3>
             <div class="price">Sur devis</div>
+            <div class="price-note">$150 – $250+ au lancement • $350 – $700+ avec une forte audience</div>
             <p>Une collaboration personnalisée pour une campagne complète et durable.</p>
             <ul>
               <li>Campagne multi-jours</li>
@@ -374,5 +383,6 @@
         }
       });
     </script>
+    <script src="language.js"></script>
   </body>
 </html>

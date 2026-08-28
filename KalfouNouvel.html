@@ -1560,6 +1560,7 @@
 
       document.querySelectorAll('.lang-btn').forEach((btn) => {
         btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
+        btn.addEventListener('click', () => localStorage.setItem('kalfou-language', btn.dataset.lang));
       });
 
       const newsletterForm = document.getElementById('newsletterForm');
@@ -1586,7 +1587,7 @@
       });
       newsletterForm?.querySelector('button')?.addEventListener('click', () => newsletterForm.requestSubmit());
 
-      updateLanguage('fr');
+      updateLanguage(localStorage.getItem('kalfou-language') || 'fr');
       loadPublishedArticles();
       loadPublishedPublicity();
     </script>

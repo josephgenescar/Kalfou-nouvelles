@@ -66,7 +66,7 @@
       main { padding: 36px 0 60px; }
       .stats {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0,1fr));
+        grid-template-columns: repeat(5, minmax(0,1fr));
         gap: 18px;
         margin-bottom: 22px;
       }
@@ -260,6 +260,14 @@
             <h3>Publicité</h3>
             <div class="big" id="publicityCount">0</div>
           </div>
+          <div class="stat-card">
+            <h3>Newsletter</h3>
+            <div class="big" id="newsletterCount">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Vizit jodi a</h3>
+            <div class="big" id="todayVisitCount">0</div>
+          </div>
         </div>
 
         <section class="panel">
@@ -278,6 +286,24 @@
             <button class="mini-btn" type="button" id="saveDraftBtn">Enregistrer brouillon</button>
           </form>
           <p id="ownerArticleMessage" class="empty"></p>
+        </section>
+
+        <section class="panel">
+          <h2>Enskripsyon newsletter</h2>
+          <div id="newsletterPanel" class="empty">Pa gen enskripsyon pou kounye a.</div>
+          <table id="newsletterTable" style="display:none;">
+            <thead><tr><th>E-mail</th><th>Date</th></tr></thead>
+            <tbody id="newsletterBody"></tbody>
+          </table>
+        </section>
+
+        <section class="panel">
+          <h2>Dènye vizit sou sit la</h2>
+          <div id="visitsPanel" class="empty">Pa gen vizit anrejistre pou kounye a.</div>
+          <table id="visitsTable" style="display:none;">
+            <thead><tr><th>Paj</th><th>Referrer</th><th>Date</th></tr></thead>
+            <tbody id="visitsBody"></tbody>
+          </table>
         </section>
 
         <section class="panel">
@@ -464,6 +490,40 @@
         `).join('');
       }
 
+      function renderNewsletterRows(items) {
+        const table = document.getElementById('newsletterTable');
+        const panel = document.getElementById('newsletterPanel');
+        const body = document.getElementById('newsletterBody');
+        if (!items.length) {
+          table.style.display = 'none';
+          panel.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+        table.style.display = 'table';
+        panel.style.display = 'none';
+        body.innerHTML = items.map((item) => `
+          <tr><td>${escapeHtml(item.email)}</td><td>${escapeHtml(formatDate(item.created_at))}</td></tr>
+        `).join('');
+      }
+
+      function renderVisitRows(items) {
+        const table = document.getElementById('visitsTable');
+        const panel = document.getElementById('visitsPanel');
+        const body = document.getElementById('visitsBody');
+        if (!items.length) {
+          table.style.display = 'none';
+          panel.style.display = 'block';
+          body.innerHTML = '';
+          return;
+        }
+        table.style.display = 'table';
+        panel.style.display = 'none';
+        body.innerHTML = items.map((item) => `
+          <tr><td>${escapeHtml(item.path)}</td><td>${escapeHtml(item.referrer || 'Direct')}</td><td>${escapeHtml(formatDate(item.created_at))}</td></tr>
+        `).join('');
+      }
+
       function renderPublicityRows(items) {
         const publicityTable = document.getElementById('publicityTable');
         const publicityPanel = document.getElementById('publicityPanel');
@@ -513,10 +573,14 @@
         document.getElementById('articleCount').textContent = state.data.counts?.articles ?? 0;
         document.getElementById('contactCount').textContent = state.data.counts?.contacts ?? 0;
         document.getElementById('publicityCount').textContent = state.data.counts?.publicity ?? 0;
+        document.getElementById('newsletterCount').textContent = state.data.counts?.newsletter ?? 0;
+        document.getElementById('todayVisitCount').textContent = state.data.counts?.todayVisits ?? 0;
 
         renderArticleRows(state.data.articles || []);
         renderContactRows(state.data.contacts || []);
         renderPublicityRows(state.data.publicity || []);
+        renderNewsletterRows(state.data.newsletter || []);
+        renderVisitRows(state.data.visits || []);
       }
 
       async function loadAdminData() {

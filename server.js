@@ -127,6 +127,27 @@ async function sendContactNotification(contact) {
   return true;
 }
 
+async function sendAdminNotification(subject, textContent) {
+  if (!BREVO_API_KEY || !CONTACT_NOTIFICATION_EMAIL || !BREVO_SENDER_EMAIL) return false;
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { accept: 'application/json', 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      sender: { name: 'Kalfou Nouvelles', email: BREVO_SENDER_EMAIL },
+      to: [{ email: CONTACT_NOTIFICATION_EMAIL }],
+      subject,
+      textContent
+    })
+  });
+
+  if (!response.ok) {
+    console.error('Brevo admin notification failed:', await response.text());
+    return false;
+  }
+  return true;
+}
+
 function escapeEmailHtml(value) {
   return String(value || '')
     .replace(/&/g, '&amp;')
@@ -291,11 +312,12 @@ app.post('/api/articles', upload.single('image'), async (req, res) => {
       return res.status(400).json({ ok: false, message: 'La vidéo doit durer au maximum 3 minutes.' });
     }
     const media = req.file ? await uploadArticleMedia(req.file) : { url: null, type: null };
-    await supabaseRequest('articles', {
+    const rows = await supabaseRequest('articles', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
+      headers: { Prefer: 'return=representation' },
       body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), image_url: media.type === 'image' ? media.url : null, media_url: media.url, media_type: media.type, status: 'pending' })
     });
+    await sendAdminNotification(`Nouvo atik soumèt: ${String(title).trim()}`, `Otè: ${String(author).trim()}\nE-mail: ${String(email).trim()}\nKategori: ${String(category).trim()}\n\n${String(summary).trim()}`);
     res.status(201).json({ ok: true, message: 'Article soumis avec succès.' });
   } catch (error) { handleServerError(res, error); }
 });
@@ -334,6 +356,7 @@ app.post('/api/publicity', upload.single('image'), async (req, res) => {
       headers: { Prefer: 'return=minimal' },
       body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), website_url: websiteUrl ? String(websiteUrl).trim() : null, type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
     });
+    await sendAdminNotification(`Nouvo demann piblisite: ${String(companyName).trim()}`, `Entreprise: ${String(company).trim()}\nE-mail: ${String(email).trim()}\nTip: ${String(type).trim()}\n\n${String(message).trim()}`);
     res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
   } catch (error) { handleServerError(res, error); }
 });
@@ -349,11 +372,15 @@ app.post('/api/newsletter', async (req, res) => {
   }
 
   try {
-    await supabaseRequest('newsletter_subscribers', {
+    const rows = await supabaseRequest('newsletter_subscribers', {
       method: 'POST',
-      headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
+      headers: { Prefer: 'resolution=ignore-duplicates,return=representation' },
       body: JSON.stringify({ email })
     });
+
+    if (rows.length) {
+      await sendAdminNotification('Nouvelle inscription à la newsletter', `Nouvelle adresse: ${email}`);
+    }
 
     const brevoResponse = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
@@ -376,6 +403,25 @@ app.get('/api/public/publicity', async (req, res) => {
   } catch (error) { handleServerError(res, error); }
 });
 
+app.post('/api/track-visit', async (req, res) => {
+  const pathValue = String(req.body?.path || '').slice(0, 500);
+  if (!pathValue || !pathValue.startsWith('/')) return res.status(400).json({ ok: false });
+  if (!requireSupabase(res)) return;
+  try {
+    await supabaseRequest('site_events', {
+      method: 'POST',
+      headers: { Prefer: 'return=minimal' },
+      body: JSON.stringify({
+        event_type: 'page_view',
+        path: pathValue,
+        referrer: String(req.body?.referrer || '').slice(0, 1000) || null,
+        user_agent: String(req.headers['user-agent'] || '').slice(0, 500) || null
+      })
+    });
+    res.status(201).json({ ok: true });
+  } catch (error) { handleServerError(res, error); }
+});
+
 app.post('/api/admin/login', (req, res) => {
   if (validatePassword(req.body?.password)) return res.json({ ok: true, message: 'Authentification réussie.' });
   return res.status(401).json({ ok: false, message: 'Mot de passe incorrect.' });
@@ -385,17 +431,22 @@ app.post('/api/admin/data', async (req, res) => {
   if (!validatePassword(req.body?.password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
   if (!requireSupabase(res)) return;
   try {
-    const [articles, contacts, publicity] = await Promise.all([
+    const [articles, contacts, publicity, newsletter, visits, todayVisits] = await Promise.all([
       supabaseRequest('articles?select=*&order=created_at.desc'),
       supabaseRequest('contacts?select=*&order=created_at.desc'),
-      supabaseRequest('publicity?select=*&order=created_at.desc')
+      supabaseRequest('publicity?select=*&order=created_at.desc'),
+      supabaseRequest('newsletter_subscribers?select=*&order=created_at.desc'),
+      supabaseRequest('site_events?select=*&event_type=eq.page_view&order=created_at.desc&limit=100'),
+      supabaseRequest(`site_events?select=id&event_type=eq.page_view&created_at=gte.${new Date().toISOString().slice(0, 10)}T00:00:00Z`)
     ]);
     res.json({
       ok: true,
-      counts: { articles: articles.length, contacts: contacts.length, publicity: publicity.length },
+      counts: { articles: articles.length, contacts: contacts.length, publicity: publicity.length, newsletter: newsletter.length, visits: visits.length, todayVisits: todayVisits.length },
       articles: articles.map(mapArticle),
       contacts: contacts.map(mapContact),
-      publicity: publicity.map(mapPublicity)
+      publicity: publicity.map(mapPublicity),
+      newsletter,
+      visits
     });
   } catch (error) { handleServerError(res, error); }
 });

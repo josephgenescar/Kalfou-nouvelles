@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <meta name="description" content="Li dènye atik ak analiz Kalfou Nouvelles sou aktyalite Ayiti." />
     <link rel="canonical" href="https://kalfou-nouvelles.netlify.app/article.html" />
     <meta property="og:type" content="article" />
@@ -11,11 +12,14 @@
     <meta property="og:url" content="https://kalfou-nouvelles.netlify.app/article.html" />
     <meta property="og:image" content="https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png" />
     <meta property="og:image:alt" content="Logo Kalfou Nouvelles" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content="Article | Kalfou Nouvelles" />
     <meta name="twitter:description" content="Li dènye atik ak analiz Kalfou Nouvelles sou aktyalite Ayiti." />
     <meta name="twitter:image" content="https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png" />
     <title>Article | Kalfou Nouvelles</title>
+    <script id="articleStructuredData" type="application/ld+json"></script>
     <style>
       :root {
         --bg: #f5f2ee;
@@ -270,8 +274,60 @@
         return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
       }
 
+      function setMetaContent(selector, content) {
+        const element = document.querySelector(selector);
+        if (element && content) element.setAttribute('content', content);
+      }
+
+      function setRobotsContent(content) {
+        const element = document.querySelector('meta[name="robots"]');
+        if (element) element.setAttribute('content', content);
+      }
+
+      function setArticleSeo(article) {
+        const title = article.title || 'Article | Kalfou Nouvelles';
+        const description = article.summary || 'Li dènye atik ak analiz Kalfou Nouvelles sou aktyalite Ayiti.';
+        const mediaUrl = article.mediaUrl || article.media_url || article.image_url || 'https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png';
+        const articleUrl = window.location.href.split('#')[0];
+        const publishedAt = article.createdAt || article.created_at || new Date().toISOString();
+
+        document.title = `${title} | Kalfou Nouvelles`;
+        const canonical = document.querySelector('link[rel="canonical"]');
+        if (canonical) canonical.setAttribute('href', articleUrl);
+        setMetaContent('meta[name="description"]', description);
+        setMetaContent('meta[property="og:title"]', title);
+        setMetaContent('meta[property="og:description"]', description);
+        setMetaContent('meta[property="og:url"]', articleUrl);
+        setMetaContent('meta[property="og:image"]', mediaUrl);
+        setMetaContent('meta[property="og:image:alt"]', title);
+        setMetaContent('meta[name="twitter:title"]', title);
+        setMetaContent('meta[name="twitter:description"]', description);
+        setMetaContent('meta[name="twitter:image"]', mediaUrl);
+
+        const structuredData = {
+          '@context': 'https://schema.org',
+          '@type': 'NewsArticle',
+          headline: title,
+          description,
+          mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+          image: [mediaUrl],
+          datePublished: publishedAt,
+          dateModified: publishedAt,
+          author: { '@type': 'Person', name: article.author || 'Rédaction' },
+          publisher: {
+            '@type': 'Organization',
+            name: 'Kalfou Nouvelles',
+            logo: { '@type': 'ImageObject', url: 'https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png' }
+          }
+        };
+        const structuredDataElement = document.getElementById('articleStructuredData');
+        if (structuredDataElement) structuredDataElement.textContent = JSON.stringify(structuredData);
+      }
+
       function renderArticle(article) {
         if (!article) return;
+
+        setArticleSeo(article);
 
         const tag = document.querySelector('.tag');
         const title = document.querySelector('.article-shell h1');
@@ -318,6 +374,7 @@
         const id = params.get('id');
 
         if (params.get('demo') === 'video') {
+          setRobotsContent('noindex, nofollow');
           renderArticle({
             title: 'Demo: yon atik ak videyo',
             author: 'Kalfou Nouvelles',
@@ -330,6 +387,8 @@
           });
           return;
         }
+
+        if (!id) setRobotsContent('noindex, follow');
 
         try {
           let url = '/api/public/articles';

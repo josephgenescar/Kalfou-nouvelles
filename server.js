@@ -200,6 +200,10 @@ function mapPublicity(row) {
 
 function handleServerError(res, error) {
   console.error(error);
+  const message = String(error?.message || '');
+  if (message.toLowerCase().includes('website_url')) {
+    return res.status(error.status || 500).json({ ok: false, message: 'Kolòn website_url la poko ajoute nan Supabase. Egzekite migration Supabase la epi eseye ankò.' });
+  }
   return res.status(error.status || 500).json({ ok: false, message: 'Erè pandan operasyon an.' });
 }
 

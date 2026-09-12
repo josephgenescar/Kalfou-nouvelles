@@ -1250,10 +1250,10 @@
         <div class="section-header">
           <h2 data-i18n="latest">Dernières infos</h2>
           <div class="line"></div>
-          <span class="more" data-i18n="see_all">Tout voir</span>
+          <a class="more" href="#latest-news" data-i18n="see_all">Tout voir</a>
         </div>
 
-        <section class="cards">
+        <section class="cards" id="latest-news">
           <a href="article.html?demo=video" style="display:block; color:inherit;">
             <article class="card">
               <div class="mini-visual"></div>
@@ -1710,7 +1710,16 @@
             title.textContent = campaign.company || 'Notre partenaire';
             const text = document.createElement('p');
             text.textContent = campaign.message || '';
-            copy.append(type, title, text);
+            if (campaign.websiteUrl) {
+              const link = document.createElement('a');
+              link.href = campaign.websiteUrl;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer sponsored';
+              link.appendChild(title);
+              copy.append(type, link, text);
+            } else {
+              copy.append(type, title, text);
+            }
             slide.appendChild(copy);
             slides.appendChild(slide);
           });

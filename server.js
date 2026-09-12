@@ -195,7 +195,7 @@ function mapContact(row) {
 }
 
 function mapPublicity(row) {
-  return { ...row, companyName: row.company_name, createdAt: row.created_at };
+  return { ...row, companyName: row.company_name, websiteUrl: row.website_url || '', createdAt: row.created_at };
 }
 
 function handleServerError(res, error) {
@@ -319,15 +319,16 @@ app.post('/api/admin/articles', async (req, res) => {
 });
 
 app.post('/api/publicity', upload.single('image'), async (req, res) => {
-  const { companyName, company, email, type, message } = req.body || {};
+  const { companyName, company, email, websiteUrl, type, message } = req.body || {};
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
+  if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
   if (!requireSupabase(res)) return;
   try {
     const imageUrl = req.file ? await uploadImage(req.file, SUPABASE_STORAGE_BUCKET) : null;
     await supabaseRequest('publicity', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
+      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), website_url: websiteUrl ? String(websiteUrl).trim() : null, type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
     });
     res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
   } catch (error) { handleServerError(res, error); }
@@ -462,15 +463,16 @@ app.post('/api/admin/publicity/:id/status', async (req, res) => {
 });
 
 app.post('/api/admin/publicity/:id/update', async (req, res) => {
-  const { password, companyName, company, email, type, message } = req.body || {};
+  const { password, companyName, company, email, websiteUrl, type, message } = req.body || {};
   if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
+  if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
   if (!requireSupabase(res)) return;
   try {
     const rows = await supabaseRequest(`publicity?id=eq.${encodeURIComponent(req.params.id)}`, {
       method: 'PATCH',
       headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), type: String(type).trim(), message: String(message).trim() })
+      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), website_url: websiteUrl ? String(websiteUrl).trim() : null, type: String(type).trim(), message: String(message).trim() })
     });
     if (!rows.length) return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
     res.json({ ok: true, publicity: mapPublicity(rows[0]), message: 'Demande modifiée avec succès.' });

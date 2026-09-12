@@ -493,6 +493,7 @@
                   <input data-edit-field="companyName" value="${escapeHtml(item.companyName)}" placeholder="Nom" />
                   <input data-edit-field="company" value="${escapeHtml(item.company)}" placeholder="Entreprise" />
                   <input data-edit-field="email" type="email" value="${escapeHtml(item.email)}" placeholder="E-mail" />
+                  <input data-edit-field="websiteUrl" type="url" value="${escapeHtml(item.websiteUrl)}" placeholder="Site web (optionnel)" />
                   <select data-edit-field="type">
                     ${['Banner', 'Article sponsorisé', 'Newsletter', 'Partenariat global'].map((type) => `<option ${item.type === type ? 'selected' : ''}>${type}</option>`).join('')}
                   </select>

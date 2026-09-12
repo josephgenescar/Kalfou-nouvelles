@@ -1,4 +1,5 @@
 alter table public.publicity add column if not exists image_url text;
+alter table public.publicity add column if not exists website_url text;
 alter table public.publicity add column if not exists status text not null default 'pending';
 alter table public.articles add column if not exists image_url text;
 alter table public.articles add column if not exists media_url text;

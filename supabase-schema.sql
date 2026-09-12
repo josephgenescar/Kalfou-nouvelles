@@ -42,6 +42,7 @@ create table if not exists public.publicity (
   company_name text not null,
   company text not null,
   email text not null,
+  website_url text,
   type text not null,
   message text not null,
   image_url text,
@@ -50,6 +51,7 @@ create table if not exists public.publicity (
 );
 
 alter table public.publicity add column if not exists image_url text;
+alter table public.publicity add column if not exists website_url text;
 alter table public.publicity add column if not exists status text not null default 'pending';
 
 insert into storage.buckets (id, name, public)

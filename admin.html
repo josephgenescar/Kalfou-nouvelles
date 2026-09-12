@@ -271,6 +271,9 @@
             <input name="category" required placeholder="Catégorie" />
             <textarea name="summary" required placeholder="Résumé"></textarea>
             <textarea name="content" required placeholder="Contenu de l’article"></textarea>
+            <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-weight:700;">
+              <input name="isFeatured" type="checkbox" value="true" /> Mettre cet article à la une
+            </label>
             <button class="mini-btn primary" type="submit">Publier maintenant</button>
             <button class="mini-btn" type="button" id="saveDraftBtn">Enregistrer brouillon</button>
           </form>
@@ -427,6 +430,7 @@
               <td>
                 ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener"><img class="article-preview" src="${escapeHtml(item.image_url)}" alt="Image de l’article" /></a>` : '<span class="empty">Sans image</span>'}
                 <button class="mini-btn primary" data-action="toggle-article" data-id="${item.id}">${actionLabel}</button>
+                <button class="mini-btn ${item.isFeatured ? 'danger' : ''}" data-action="toggle-featured" data-id="${item.id}">${item.isFeatured ? 'Retirer de la une' : 'Mettre à la une'}</button>
                 <button class="mini-btn danger" data-action="delete-article" data-id="${item.id}">Supprimer</button>
               </td>
             </tr>
@@ -573,6 +577,11 @@
 
           if (action === 'delete-article') {
             await callAdminAction(`/api/admin/articles/${id}/delete`, {});
+          }
+
+          if (action === 'toggle-featured') {
+            const article = (state.data.articles || []).find((item) => item.id === id);
+            await callAdminAction(`/api/admin/articles/${id}/featured`, { featured: !(article && article.isFeatured) });
           }
 
           if (action === 'delete-contact') {

@@ -1,6 +1,9 @@
 alter table public.publicity add column if not exists image_url text;
 alter table public.publicity add column if not exists status text not null default 'pending';
 alter table public.articles add column if not exists image_url text;
+alter table public.articles add column if not exists media_url text;
+alter table public.articles add column if not exists media_type text check (media_type in ('image', 'video'));
+alter table public.articles add column if not exists is_featured boolean not null default false;
 
 create table if not exists public.newsletter_subscribers (
 	id uuid primary key default gen_random_uuid(),

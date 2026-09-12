@@ -98,13 +98,20 @@
         border-bottom: 1px solid var(--line);
         padding: 12px 0;
       }
-      .hero-image {
-        height: 360px;
-        background-image: url('https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80');
-        background-size: cover;
-        background-position: center;
+      .article-media {
+        min-height: 360px;
+        background: #101010;
         margin-bottom: 24px;
       }
+      .article-media img,
+      .article-media video {
+        display: block;
+        width: 100%;
+        max-height: 620px;
+        object-fit: contain;
+        background: #101010;
+      }
+      .article-media img { height: 360px; object-fit: cover; }
       .article-body p {
         margin: 0 0 18px;
         color: #252525;
@@ -199,7 +206,7 @@
           <div class="tag">Politique • Analyse</div>
           <h1>La crise politique de Haïti met à rude épreuve l’avenir du pays</h1>
           <div class="meta">Par Marie-Claire Estimé • 18 août 2026 • 8 min de lecture</div>
-          <div class="hero-image"></div>
+          <div class="article-media" id="articleMedia"></div>
 
           <div class="article-body">
             <p>Alors que les institutions restent fragiles, la question de la gouvernance et de la confiance nationale revient au centre du débat. Les citoyens réclament plus de clarté, plus de justice et surtout des réponses concrètes à des problèmes qui s’accumulent depuis plusieurs mois.</p>
@@ -244,6 +251,7 @@
       </div>
     </footer>
 
+    <script src="https://pl31299573.profitableratecpmnetwork.com/3f/64/44/3f64449ab897c9caa09f9c3133f748f9.js"></script>
     <script>
       function formatDisplayDate(value) {
         if (!value) return 'Aujourd’hui';
@@ -258,7 +266,7 @@
         const tag = document.querySelector('.tag');
         const title = document.querySelector('.article-shell h1');
         const meta = document.querySelector('.meta');
-        const hero = document.querySelector('.hero-image');
+        const media = document.getElementById('articleMedia');
         const body = document.querySelector('.article-body');
         const relatedList = document.querySelector('.related-list');
         const quote = document.querySelector('.quote-box p');
@@ -266,9 +274,23 @@
         if (tag) tag.textContent = `${article.category || 'Actualité'} • Analyse`;
         if (title) title.textContent = article.title;
         if (meta) meta.textContent = `Par ${article.author || 'Rédaction'} • ${formatDisplayDate(article.createdAt)} • ${article.category || 'Actualité'}`;
-        if (hero) {
-          const imageUrl = article.image_url || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80';
-          hero.style.backgroundImage = `linear-gradient(135deg, rgba(17,17,17,0.28), rgba(17,17,17,0.12)), url('${encodeURI(imageUrl)}')`;
+        if (media) {
+          media.innerHTML = '';
+          const mediaUrl = article.mediaUrl || article.media_url || article.image_url;
+          const mediaType = article.mediaType || article.media_type || (article.image_url ? 'image' : null);
+          if (mediaUrl && mediaType === 'video') {
+            const video = document.createElement('video');
+            video.src = mediaUrl;
+            video.controls = true;
+            video.preload = 'metadata';
+            video.playsInline = true;
+            media.appendChild(video);
+          } else {
+            const image = document.createElement('img');
+            image.src = mediaUrl || 'https://images.unsplash.com/photo-1495020689067-958852a7765e?auto=format&fit=crop&w=1200&q=80';
+            image.alt = article.title || 'Image de l’article';
+            media.appendChild(image);
+          }
         }
 
         if (body) {
@@ -284,6 +306,20 @@
       async function loadArticle() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
+
+        if (params.get('demo') === 'video') {
+          renderArticle({
+            title: 'Demo: yon atik ak videyo',
+            author: 'Kalfou Nouvelles',
+            category: 'Demo vidéo',
+            createdAt: new Date().toISOString(),
+            summary: 'Men fason yon videyo ap parèt nan menm espas medya atik la.',
+            content: 'Videyo sa a se yon demonstrasyon lokal pou verifye layout la. Lè ImageKit la aktive, URL videyo a ap soti dirèkteman nan ImageKit.',
+            mediaUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+            mediaType: 'video'
+          });
+          return;
+        }
 
         try {
           let url = '/api/public/articles';

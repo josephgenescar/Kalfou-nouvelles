@@ -12,6 +12,9 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_STORAGE_BUCKET = process.env.SUPABASE_STORAGE_BUCKET || 'publicity-images';
 const SUPABASE_ARTICLE_BUCKET = process.env.SUPABASE_ARTICLE_BUCKET || 'article-images';
+const IMAGEKIT_PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY;
+const IMAGEKIT_ARTICLE_FOLDER = process.env.IMAGEKIT_ARTICLE_FOLDER || '/kalfou/articles';
+const MAX_VIDEO_DURATION_SECONDS = 3 * 60;
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
 const CONTACT_NOTIFICATION_EMAIL = process.env.CONTACT_NOTIFICATION_EMAIL;
@@ -23,8 +26,8 @@ app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (req, file, callback) => callback(null, /^image\/(jpeg|png|webp|gif)$/.test(file.mimetype))
+  limits: { fileSize: 100 * 1024 * 1024 },
+  fileFilter: (req, file, callback) => callback(null, /^(image\/(jpeg|png|webp|gif)|video\/(mp4|webm|quicktime))$/.test(file.mimetype))
 });
 
 function requireSupabase(res) {
@@ -72,6 +75,30 @@ async function uploadImage(file, bucket) {
   return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${filePath}`;
 }
 
+async function uploadArticleMedia(file) {
+  if (!IMAGEKIT_PRIVATE_KEY) {
+    if (!file.mimetype.startsWith('image/')) {
+      throw new Error('ImageKit pa konfigire pou upload videyo a.');
+    }
+    return { url: await uploadImage(file, SUPABASE_ARTICLE_BUCKET), type: 'image' };
+  }
+
+  const form = new FormData();
+  form.append('file', new Blob([file.buffer], { type: file.mimetype }), file.originalname);
+  form.append('fileName', file.originalname);
+  form.append('folder', IMAGEKIT_ARTICLE_FOLDER);
+  form.append('useUniqueFileName', 'true');
+
+  const response = await fetch('https://upload.imagekit.io/api/v1/files/upload', {
+    method: 'POST',
+    headers: { Authorization: `Basic ${Buffer.from(`${IMAGEKIT_PRIVATE_KEY}:`).toString('base64')}` },
+    body: form
+  });
+  const result = await response.json();
+  if (!response.ok || !result.url) throw new Error(result.message || 'Media a pa ka upload nan ImageKit.');
+  return { url: result.url, type: file.mimetype.startsWith('video/') ? 'video' : 'image' };
+}
+
 async function sendContactNotification(contact) {
   if (!BREVO_API_KEY || !CONTACT_NOTIFICATION_EMAIL || !BREVO_SENDER_EMAIL) {
     return false;
@@ -100,8 +127,67 @@ async function sendContactNotification(contact) {
   return true;
 }
 
+function escapeEmailHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+async function sendArticlePublicationNotification(article) {
+  if (!BREVO_API_KEY || !BREVO_LIST_ID || !BREVO_SENDER_EMAIL) return false;
+
+  const title = escapeEmailHtml(article.title);
+  const summary = escapeEmailHtml(article.summary);
+  const articleUrl = `https://kalfou-nouvelles.netlify.app/article.html?id=${encodeURIComponent(article.id)}`;
+  const response = await fetch('https://api.brevo.com/v3/emailCampaigns', {
+    method: 'POST',
+    headers: { accept: 'application/json', 'api-key': BREVO_API_KEY, 'content-type': 'application/json' },
+    body: JSON.stringify({
+      name: `Kalfou Nouvelles - ${article.title}`,
+      subject: `Nouvel article: ${article.title}`,
+      sender: { name: 'Kalfou Nouvelles', email: BREVO_SENDER_EMAIL },
+      replyTo: BREVO_SENDER_EMAIL,
+      type: 'classic',
+      htmlContent: `<h1>${title}</h1><p>${summary}</p><p><a href="${articleUrl}">Lire l'article complet</a></p>`,
+      recipients: { listIds: [Number(BREVO_LIST_ID)] }
+    })
+  });
+
+  const campaign = await response.json();
+  if (!response.ok || !campaign.id) {
+    throw new Error(campaign.message || 'Brevo publication notification failed');
+  }
+
+  const sendResponse = await fetch(`https://api.brevo.com/v3/emailCampaigns/${campaign.id}/sendNow`, {
+    method: 'POST',
+    headers: { accept: 'application/json', 'api-key': BREVO_API_KEY }
+  });
+  if (!sendResponse.ok) {
+    throw new Error(`Brevo send failed: ${await sendResponse.text()}`);
+  }
+  return true;
+}
+
+async function notifyArticlePublication(article) {
+  try {
+    return await sendArticlePublicationNotification(article);
+  } catch (error) {
+    console.error('Brevo article notification failed:', error);
+    return false;
+  }
+}
+
 function mapArticle(row) {
-  return { ...row, createdAt: row.created_at };
+  return {
+    ...row,
+    createdAt: row.created_at,
+    mediaUrl: row.media_url || row.image_url || null,
+    isFeatured: Boolean(row.is_featured),
+    mediaType: row.media_type || (row.image_url ? 'image' : null)
+  };
 }
 
 function mapContact(row) {
@@ -192,33 +278,43 @@ app.post('/api/contact', async (req, res) => {
 });
 
 app.post('/api/articles', upload.single('image'), async (req, res) => {
-  const { author, email, title, category, summary, content } = req.body || {};
+  const { author, email, title, category, summary, content, mediaDuration } = req.body || {};
   if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (!requireSupabase(res)) return;
   try {
-    const imageUrl = req.file ? await uploadImage(req.file, SUPABASE_ARTICLE_BUCKET) : null;
+    const duration = Number(mediaDuration || 0);
+    if (req.file?.mimetype.startsWith('video/') && (!duration || duration > MAX_VIDEO_DURATION_SECONDS)) {
+      return res.status(400).json({ ok: false, message: 'La vidéo doit durer au maximum 3 minutes.' });
+    }
+    const media = req.file ? await uploadArticleMedia(req.file) : { url: null, type: null };
     await supabaseRequest('articles', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), image_url: imageUrl, status: 'pending' })
+      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), image_url: media.type === 'image' ? media.url : null, media_url: media.url, media_type: media.type, status: 'pending' })
     });
     res.status(201).json({ ok: true, message: 'Article soumis avec succès.' });
   } catch (error) { handleServerError(res, error); }
 });
 
 app.post('/api/admin/articles', async (req, res) => {
-  const { password, author, email, title, category, summary, content, status } = req.body || {};
+  const { password, author, email, title, category, summary, content, status, isFeatured } = req.body || {};
   if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
   if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (!['pending', 'published'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
   if (!requireSupabase(res)) return;
   try {
+    const featured = isFeatured === true || isFeatured === 'true';
+    if (featured) {
+      await supabaseRequest('articles?is_featured=eq.true', { method: 'PATCH', body: JSON.stringify({ is_featured: false }) });
+    }
     const rows = await supabaseRequest('articles', {
       method: 'POST',
       headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), status })
+      body: JSON.stringify({ author: String(author).trim(), email: String(email).trim(), title: String(title).trim(), category: String(category).trim(), summary: String(summary).trim(), content: String(content).trim(), status, is_featured: featured })
     });
-    res.status(201).json({ ok: true, article: mapArticle(rows[0]), message: status === 'published' ? 'Article publié avec succès.' : 'Brouillon enregistré.' });
+    const article = mapArticle(rows[0]);
+    const notificationSent = status === 'published' ? await notifyArticlePublication(article) : false;
+    res.status(201).json({ ok: true, article, message: status === 'published' ? (notificationSent ? 'Article publié et notification envoyée.' : 'Article publié. Notification non envoyée.') : 'Brouillon enregistré.' });
   } catch (error) { handleServerError(res, error); }
 });
 
@@ -302,7 +398,7 @@ app.post('/api/admin/data', async (req, res) => {
 app.get('/api/public/articles', async (req, res) => {
   if (!requireSupabase(res)) return;
   try {
-    const rows = await supabaseRequest('articles?select=*&status=eq.published&order=created_at.desc');
+    const rows = await supabaseRequest('articles?select=*&status=eq.published&order=is_featured.desc,created_at.desc');
     res.json({ ok: true, articles: rows.map(mapArticle) });
   } catch (error) { handleServerError(res, error); }
 });
@@ -322,9 +418,34 @@ app.post('/api/admin/articles/:id/status', async (req, res) => {
   if (!['pending', 'published', 'rejected'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
   if (!requireSupabase(res)) return;
   try {
+    const currentRows = await supabaseRequest(`articles?id=eq.${encodeURIComponent(req.params.id)}&select=*`);
+    if (!currentRows.length) return res.status(404).json({ ok: false, message: 'Article introuvable.' });
     const rows = await supabaseRequest(`articles?id=eq.${encodeURIComponent(req.params.id)}`, { method: 'PATCH', headers: { Prefer: 'return=representation' }, body: JSON.stringify({ status }) });
     if (!rows.length) return res.status(404).json({ ok: false, message: 'Article introuvable.' });
-    res.json({ ok: true, article: mapArticle(rows[0]) });
+    const article = mapArticle(rows[0]);
+    const notificationSent = status === 'published' && currentRows[0].status !== 'published'
+      ? await notifyArticlePublication(article)
+      : false;
+    res.json({ ok: true, article, notificationSent });
+  } catch (error) { handleServerError(res, error); }
+});
+
+app.post('/api/admin/articles/:id/featured', async (req, res) => {
+  const { password, featured } = req.body || {};
+  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  if (!requireSupabase(res)) return;
+  try {
+    const shouldFeature = featured === true || featured === 'true';
+    if (shouldFeature) {
+      await supabaseRequest('articles?is_featured=eq.true', { method: 'PATCH', body: JSON.stringify({ is_featured: false }) });
+    }
+    const rows = await supabaseRequest(`articles?id=eq.${encodeURIComponent(req.params.id)}`, {
+      method: 'PATCH',
+      headers: { Prefer: 'return=representation' },
+      body: JSON.stringify({ is_featured: shouldFeature })
+    });
+    if (!rows.length) return res.status(404).json({ ok: false, message: 'Article introuvable.' });
+    res.json({ ok: true, article: mapArticle(rows[0]), message: shouldFeature ? 'Article mis à la une.' : 'Article retiré de la une.' });
   } catch (error) { handleServerError(res, error); }
 });
 
@@ -369,215 +490,6 @@ async function deleteAdminRow(table, id, password, res, label) {
 app.post('/api/admin/articles/:id/delete', (req, res) => deleteAdminRow('articles', req.params.id, req.body?.password, res, 'Article'));
 app.post('/api/admin/contacts/:id/delete', (req, res) => deleteAdminRow('contacts', req.params.id, req.body?.password, res, 'Message'));
 app.post('/api/admin/publicity/:id/delete', (req, res) => deleteAdminRow('publicity', req.params.id, req.body?.password, res, 'Demande'));
-
-app.post('/api/contact', (req, res) => {
-  const { name, email, subject, message } = req.body || {};
-
-  if (!name || !email || !subject || !message) {
-    return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
-  }
-
-  const data = readData();
-  const entry = {
-    id: randomUUID(),
-    name: String(name).trim(),
-    email: String(email).trim(),
-    subject: String(subject).trim(),
-    message: String(message).trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  data.contacts.push(entry);
-  writeData(data);
-
-  res.status(201).json({ ok: true, message: 'Message enregistré avec succès.' });
-});
-
-app.post('/api/articles', (req, res) => {
-  const { author, email, title, category, summary, content } = req.body || {};
-
-  if (!author || !email || !title || !category || !summary || !content) {
-    return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
-  }
-
-  const data = readData();
-  const entry = {
-    id: randomUUID(),
-    author: String(author).trim(),
-    email: String(email).trim(),
-    title: String(title).trim(),
-    category: String(category).trim(),
-    summary: String(summary).trim(),
-    content: String(content).trim(),
-    status: 'pending',
-    createdAt: new Date().toISOString()
-  };
-
-  data.articles.push(entry);
-  writeData(data);
-
-  res.status(201).json({ ok: true, message: 'Article soumis avec succès.' });
-});
-
-app.post('/api/publicity', (req, res) => {
-  const { companyName, company, email, type, message } = req.body || {};
-
-  if (!companyName || !company || !email || !type || !message) {
-    return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
-  }
-
-  const data = readData();
-  const entry = {
-    id: randomUUID(),
-    companyName: String(companyName).trim(),
-    company: String(company).trim(),
-    email: String(email).trim(),
-    type: String(type).trim(),
-    message: String(message).trim(),
-    createdAt: new Date().toISOString()
-  };
-
-  data.publicity.push(entry);
-  writeData(data);
-
-  res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
-});
-
-app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body || {};
-
-  if (validatePassword(password)) {
-    return res.json({ ok: true, message: 'Authentification réussie.' });
-  }
-
-  return res.status(401).json({ ok: false, message: 'Mot de passe incorrect.' });
-});
-
-app.post('/api/admin/data', (req, res) => {
-  const { password } = req.body || {};
-
-  if (!validatePassword(password)) {
-    return res.status(401).json({ ok: false, message: 'Accès refusé.' });
-  }
-
-  const data = readData();
-  return res.json({
-    ok: true,
-    counts: {
-      articles: data.articles.length,
-      contacts: data.contacts.length,
-      publicity: data.publicity.length
-    },
-    articles: data.articles,
-    contacts: data.contacts,
-    publicity: data.publicity
-  });
-});
-
-app.get('/api/public/articles', (req, res) => {
-  const data = readData();
-  const published = data.articles
-    .filter((article) => article.status === 'published')
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  return res.json({ ok: true, articles: published });
-});
-
-app.get('/api/public/articles/:id', (req, res) => {
-  const data = readData();
-  const article = data.articles.find((item) => item.id === req.params.id && item.status === 'published');
-
-  if (!article) {
-    return res.status(404).json({ ok: false, message: 'Article introuvable.' });
-  }
-
-  return res.json({ ok: true, article });
-});
-
-app.post('/api/admin/articles/:id/status', (req, res) => {
-  const { password, status } = req.body || {};
-  const allowed = ['pending', 'published', 'rejected'];
-
-  if (!validatePassword(password)) {
-    return res.status(401).json({ ok: false, message: 'Accès refusé.' });
-  }
-
-  if (!allowed.includes(status)) {
-    return res.status(400).json({ ok: false, message: 'Statut invalide.' });
-  }
-
-  const data = readData();
-  const index = data.articles.findIndex((item) => item.id === req.params.id);
-
-  if (index === -1) {
-    return res.status(404).json({ ok: false, message: 'Article introuvable.' });
-  }
-
-  data.articles[index].status = status;
-  writeData(data);
-
-  return res.json({ ok: true, article: data.articles[index] });
-});
-
-app.post('/api/admin/articles/:id/delete', (req, res) => {
-  const { password } = req.body || {};
-
-  if (!validatePassword(password)) {
-    return res.status(401).json({ ok: false, message: 'Accès refusé.' });
-  }
-
-  const data = readData();
-  const nextArticles = data.articles.filter((item) => item.id !== req.params.id);
-
-  if (nextArticles.length === data.articles.length) {
-    return res.status(404).json({ ok: false, message: 'Article introuvable.' });
-  }
-
-  data.articles = nextArticles;
-  writeData(data);
-
-  return res.json({ ok: true, message: 'Article supprimé.' });
-});
-
-app.post('/api/admin/contacts/:id/delete', (req, res) => {
-  const { password } = req.body || {};
-
-  if (!validatePassword(password)) {
-    return res.status(401).json({ ok: false, message: 'Accès refusé.' });
-  }
-
-  const data = readData();
-  const nextContacts = data.contacts.filter((item) => item.id !== req.params.id);
-
-  if (nextContacts.length === data.contacts.length) {
-    return res.status(404).json({ ok: false, message: 'Message introuvable.' });
-  }
-
-  data.contacts = nextContacts;
-  writeData(data);
-
-  return res.json({ ok: true, message: 'Message supprimé.' });
-});
-
-app.post('/api/admin/publicity/:id/delete', (req, res) => {
-  const { password } = req.body || {};
-
-  if (!validatePassword(password)) {
-    return res.status(401).json({ ok: false, message: 'Accès refusé.' });
-  }
-
-  const data = readData();
-  const nextPublicity = data.publicity.filter((item) => item.id !== req.params.id);
-
-  if (nextPublicity.length === data.publicity.length) {
-    return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
-  }
-
-  data.publicity = nextPublicity;
-  writeData(data);
-
-  return res.json({ ok: true, message: 'Demande supprimée.' });
-});
 
 app.use(express.static(__dirname));
 

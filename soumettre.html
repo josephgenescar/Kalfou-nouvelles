@@ -135,6 +135,11 @@
         display: none;
       }
       .success.visible { display: block; }
+      .media-help {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
       footer {
         background: #101010;
         color: #d8d8d8;
@@ -214,13 +219,15 @@
               </div>
 
               <div class="field full">
-                <label for="content">Contenu</label>
-                <textarea id="content" name="content" placeholder="Saisissez le contenu détaillé de votre article..." required></textarea>
+                <label for="content">Texte de l’article</label>
+                <textarea id="content" name="content" placeholder="Écrivez ici l’article qui apparaîtra sous l’image ou la vidéo..." required></textarea>
               </div>
 
               <div class="field full">
-                <label for="image">Image de l’article (optionnelle, JPG, PNG, WEBP ou GIF, 5 Mo maximum)</label>
-                <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif" />
+                <label for="image">Image ou vidéo de l’article (optionnel)</label>
+                <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" />
+                <p class="media-help">Videyo a dwe dire 3 minit oswa mwens. Fòma: MP4, WebM oswa MOV. Gwosè maximum: 100 Mo.</p>
+                <input id="mediaDuration" name="mediaDuration" type="hidden" value="" />
               </div>
             </div>
 
@@ -246,6 +253,37 @@
     <script>
       const form = document.getElementById('articleForm');
       const successMessage = document.getElementById('successMessage');
+      const mediaInput = document.getElementById('image');
+      const mediaDuration = document.getElementById('mediaDuration');
+      const maxVideoDuration = 3 * 60;
+
+      mediaInput.addEventListener('change', () => {
+        const file = mediaInput.files[0];
+        mediaDuration.value = '';
+        if (!file || !file.type.startsWith('video/')) return;
+
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          URL.revokeObjectURL(video.src);
+          if (!Number.isFinite(video.duration) || video.duration > maxVideoDuration) {
+            mediaInput.value = '';
+            successMessage.textContent = 'Videyo a dwe dire 3 minit oswa mwens.';
+            successMessage.classList.add('visible');
+            successMessage.style.background = '#fff3f3';
+            successMessage.style.borderColor = 'rgba(216,43,43,.25)';
+            successMessage.style.color = '#a51d1d';
+            return;
+          }
+          mediaDuration.value = String(Math.round(video.duration));
+        };
+        video.onerror = () => {
+          mediaInput.value = '';
+          successMessage.textContent = 'Videyo sa a pa ka verifye. Chwazi yon MP4 oswa WebM ki valab.';
+          successMessage.classList.add('visible');
+        };
+        video.src = URL.createObjectURL(file);
+      });
 
       form.addEventListener('submit', async function (event) {
         event.preventDefault();
@@ -274,6 +312,7 @@
         }
       });
     </script>
+    <script src="https://pl31299573.profitableratecpmnetwork.com/3f/64/44/3f64449ab897c9caa09f9c3133f748f9.js"></script>
     <script src="language.js"></script>
   </body>
 </html>

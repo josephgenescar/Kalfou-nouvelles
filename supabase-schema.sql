@@ -6,6 +6,10 @@ create table if not exists public.articles (
   category text not null,
   summary text not null,
   content text not null,
+  image_url text,
+  media_url text,
+  media_type text check (media_type in ('image', 'video')),
+  is_featured boolean not null default false,
   status text not null default 'pending' check (status in ('pending', 'published', 'rejected')),
   created_at timestamptz not null default now()
 );
@@ -18,6 +22,20 @@ create table if not exists public.contacts (
   message text not null,
   created_at timestamptz not null default now()
 );
+
+create table if not exists public.newsletter_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text unique not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.newsletter_subscribers enable row level security;
+
+drop policy if exists "Anyone can subscribe to newsletter" on public.newsletter_subscribers;
+create policy "Anyone can subscribe to newsletter"
+on public.newsletter_subscribers for insert
+to anon, authenticated
+with check (true);
 
 create table if not exists public.publicity (
   id uuid primary key default gen_random_uuid(),

@@ -126,6 +126,50 @@
         background: #101010;
       }
       .article-media img { height: 360px; object-fit: cover; }
+      .share-box {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 0 0 24px;
+        padding: 14px 16px;
+        background: #faf8f5;
+        border: 1px solid var(--line);
+      }
+      .share-label {
+        margin-right: 4px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+      .share-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 8px 11px;
+        border: 0;
+        color: #fff;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .share-facebook { background: #1877f2; }
+      .share-whatsapp { background: #25d366; }
+      .share-x { background: #111; }
+      .share-copy { background: var(--blue); }
+      .share-native { display: none; background: var(--red); }
+      .share-status {
+        flex-basis: 100%;
+        min-height: 18px;
+        margin: 0;
+        color: var(--green, #14734d);
+        font-size: 12px;
+      }
       .article-body p {
         margin: 0 0 18px;
         color: #252525;
@@ -221,6 +265,15 @@
           <h1>La crise politique de Haïti met à rude épreuve l’avenir du pays</h1>
           <div class="meta">Par Marie-Claire Estimé • 18 août 2026 • 8 min de lecture</div>
           <div class="article-media" id="articleMedia"></div>
+          <div class="share-box" aria-label="Partager cet article">
+            <span class="share-label">Partager</span>
+            <a id="shareFacebook" class="share-button share-facebook" href="#" target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a id="shareWhatsApp" class="share-button share-whatsapp" href="#" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a id="shareX" class="share-button share-x" href="#" target="_blank" rel="noopener noreferrer">X</a>
+            <button id="shareNative" class="share-button share-native" type="button">Partager</button>
+            <button id="copyArticleLink" class="share-button share-copy" type="button">Copier le lien</button>
+            <p id="shareStatus" class="share-status" aria-live="polite"></p>
+          </div>
 
           <div class="article-body">
             <p>Alors que les institutions restent fragiles, la question de la gouvernance et de la confiance nationale revient au centre du débat. Les citoyens réclament plus de clarté, plus de justice et surtout des réponses concrètes à des problèmes qui s’accumulent depuis plusieurs mois.</p>
@@ -324,10 +377,49 @@
         if (structuredDataElement) structuredDataElement.textContent = JSON.stringify(structuredData);
       }
 
+      function configureArticleSharing(article) {
+        const articleUrl = window.location.href.split('#')[0];
+        const title = article.title || 'Kalfou Nouvelles';
+        const shareText = `${title} - Kalfou Nouvelles`;
+        const encodedUrl = encodeURIComponent(articleUrl);
+        const encodedText = encodeURIComponent(shareText);
+        const facebook = document.getElementById('shareFacebook');
+        const whatsapp = document.getElementById('shareWhatsApp');
+        const x = document.getElementById('shareX');
+        const native = document.getElementById('shareNative');
+        const copy = document.getElementById('copyArticleLink');
+        const status = document.getElementById('shareStatus');
+
+        if (facebook) facebook.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        if (whatsapp) whatsapp.href = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+        if (x) x.href = `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+        if (navigator.share && native) {
+          native.style.display = 'inline-flex';
+          native.onclick = async () => {
+            try {
+              await navigator.share({ title, text: shareText, url: articleUrl });
+            } catch (error) {
+              if (error.name !== 'AbortError' && status) status.textContent = 'Partage annulé.';
+            }
+          };
+        }
+        if (copy) {
+          copy.onclick = async () => {
+            try {
+              await navigator.clipboard.writeText(articleUrl);
+              if (status) status.textContent = 'Lien copié. Ou ka kole li sou nenpòt rezo.';
+            } catch (error) {
+              if (status) status.textContent = articleUrl;
+            }
+          };
+        }
+      }
+
       function renderArticle(article) {
         if (!article) return;
 
         setArticleSeo(article);
+        configureArticleSharing(article);
 
         const tag = document.querySelector('.tag');
         const title = document.querySelector('.article-shell h1');

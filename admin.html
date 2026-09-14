@@ -265,8 +265,12 @@
             <div class="big" id="newsletterCount">0</div>
           </div>
           <div class="stat-card">
-            <h3>Vizit jodi a</h3>
+            <h3>Visiteurs uniques aujourd’hui</h3>
             <div class="big" id="todayVisitCount">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Visiteurs uniques</h3>
+            <div class="big" id="visitCount">0</div>
           </div>
         </div>
 
@@ -575,6 +579,7 @@
         document.getElementById('publicityCount').textContent = state.data.counts?.publicity ?? 0;
         document.getElementById('newsletterCount').textContent = state.data.counts?.newsletter ?? 0;
         document.getElementById('todayVisitCount').textContent = state.data.counts?.todayVisits ?? 0;
+        document.getElementById('visitCount').textContent = state.data.counts?.visits ?? 0;
 
         renderArticleRows(state.data.articles || []);
         renderContactRows(state.data.contacts || []);

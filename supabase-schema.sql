@@ -35,8 +35,14 @@ create table if not exists public.site_events (
   path text not null,
   referrer text,
   user_agent text,
+  visitor_id text,
+  visit_day date not null default current_date,
   created_at timestamptz not null default now()
 );
+
+create unique index if not exists site_events_unique_visitor_day
+on public.site_events (visitor_id, visit_day)
+where visitor_id is not null;
 
 alter table public.site_events enable row level security;
 

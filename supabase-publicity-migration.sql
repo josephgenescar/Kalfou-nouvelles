@@ -6,6 +6,12 @@ alter table public.articles add column if not exists media_url text;
 alter table public.articles add column if not exists media_type text check (media_type in ('image', 'video'));
 alter table public.articles add column if not exists is_featured boolean not null default false;
 
+alter table public.site_events add column if not exists visitor_id text;
+alter table public.site_events add column if not exists visit_day date not null default current_date;
+create unique index if not exists site_events_unique_visitor_day
+on public.site_events (visitor_id, visit_day)
+where visitor_id is not null;
+
 create table if not exists public.newsletter_subscribers (
 	id uuid primary key default gen_random_uuid(),
 	email text unique not null,

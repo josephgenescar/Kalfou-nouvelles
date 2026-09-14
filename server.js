@@ -225,6 +225,9 @@ function handleServerError(res, error) {
   if (message.toLowerCase().includes('website_url')) {
     return res.status(error.status || 500).json({ ok: false, message: 'Kolòn website_url la poko ajoute nan Supabase. Egzekite migration Supabase la epi eseye ankò.' });
   }
+  if (message.toLowerCase().includes('is_featured')) {
+    return res.status(error.status || 500).json({ ok: false, message: 'Kolòn is_featured la poko ajoute nan Supabase. Egzekite migration Supabase la epi eseye ankò.' });
+  }
   return res.status(error.status || 500).json({ ok: false, message: 'Erè pandan operasyon an.' });
 }
 
@@ -405,17 +408,21 @@ app.get('/api/public/publicity', async (req, res) => {
 
 app.post('/api/track-visit', async (req, res) => {
   const pathValue = String(req.body?.path || '').slice(0, 500);
+  const visitorId = String(req.body?.visitorId || '').trim();
   if (!pathValue || !pathValue.startsWith('/')) return res.status(400).json({ ok: false });
+  if (!/^[a-z0-9-]{20,80}$/i.test(visitorId)) return res.status(400).json({ ok: false, message: 'Visiteur non identifie.' });
   if (!requireSupabase(res)) return;
   try {
     await supabaseRequest('site_events', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
+      headers: { Prefer: 'resolution=ignore-duplicates,return=minimal' },
       body: JSON.stringify({
         event_type: 'page_view',
         path: pathValue,
         referrer: String(req.body?.referrer || '').slice(0, 1000) || null,
-        user_agent: String(req.headers['user-agent'] || '').slice(0, 500) || null
+        user_agent: String(req.headers['user-agent'] || '').slice(0, 500) || null,
+        visitor_id: visitorId,
+        visit_day: new Date().toISOString().slice(0, 10)
       })
     });
     res.status(201).json({ ok: true });
@@ -436,8 +443,8 @@ app.post('/api/admin/data', async (req, res) => {
       supabaseRequest('contacts?select=*&order=created_at.desc'),
       supabaseRequest('publicity?select=*&order=created_at.desc'),
       supabaseRequest('newsletter_subscribers?select=*&order=created_at.desc'),
-      supabaseRequest('site_events?select=*&event_type=eq.page_view&order=created_at.desc&limit=100'),
-      supabaseRequest(`site_events?select=id&event_type=eq.page_view&created_at=gte.${new Date().toISOString().slice(0, 10)}T00:00:00Z`)
+      supabaseRequest('site_events?select=*&event_type=eq.page_view&visitor_id=not.is.null&order=created_at.desc&limit=10000'),
+      supabaseRequest(`site_events?select=id&event_type=eq.page_view&visitor_id=not.is.null&visit_day=eq.${new Date().toISOString().slice(0, 10)}`)
     ]);
     res.json({
       ok: true,
@@ -454,7 +461,13 @@ app.post('/api/admin/data', async (req, res) => {
 app.get('/api/public/articles', async (req, res) => {
   if (!requireSupabase(res)) return;
   try {
-    const rows = await supabaseRequest('articles?select=*&status=eq.published&order=is_featured.desc,created_at.desc');
+    let rows;
+    try {
+      rows = await supabaseRequest('articles?select=*&status=eq.published&order=is_featured.desc,created_at.desc');
+    } catch (error) {
+      if (!String(error.message || '').toLowerCase().includes('is_featured')) throw error;
+      rows = await supabaseRequest('articles?select=*&status=eq.published&order=created_at.desc');
+    }
     res.json({ ok: true, articles: rows.map(mapArticle) });
   } catch (error) { handleServerError(res, error); }
 });

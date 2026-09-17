@@ -49,7 +49,16 @@ async function supabaseRequest(table, options = {}) {
     }
   });
   const text = await response.text();
-  const body = text ? JSON.parse(text) : null;
+  let body = null;
+  if (text) {
+    try {
+      body = JSON.parse(text);
+    } catch {
+      const error = new Error(`Supabase returned a non-JSON response (${response.status}).`);
+      error.status = response.status || 502;
+      throw error;
+    }
+  }
   if (!response.ok) {
     const error = new Error(body?.message || body?.hint || 'Supabase request failed');
     error.status = response.status;

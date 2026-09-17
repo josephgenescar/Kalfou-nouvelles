@@ -257,6 +257,16 @@
       const mediaDuration = document.getElementById('mediaDuration');
       const maxVideoDuration = 3 * 60;
 
+      async function readResponse(response) {
+        const text = await response.text();
+        if (!text) return {};
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { message: `Sèvè a pa retounen yon repons JSON (HTTP ${response.status}).` };
+        }
+      }
+
       mediaInput.addEventListener('change', () => {
         const file = mediaInput.files[0];
         mediaDuration.value = '';
@@ -295,7 +305,7 @@
             body: formData
           });
 
-          const result = await response.json();
+          const result = await readResponse(response);
           if (!response.ok) {
             throw new Error(result.message || 'Erreur lors de l\'envoi.');
           }

@@ -129,6 +129,21 @@
         width: 100%;
         border-collapse: collapse;
       }
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .visit-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+      .visit-page-info {
+        color: var(--muted);
+        font-size: 13px;
+      }
       th, td {
         text-align: left;
         padding: 12px 10px;
@@ -304,10 +319,19 @@
         <section class="panel">
           <h2>Dènye vizit sou sit la</h2>
           <div id="visitsPanel" class="empty">Pa gen vizit anrejistre pou kounye a.</div>
-          <table id="visitsTable" style="display:none;">
-            <thead><tr><th>Paj</th><th>Referrer</th><th>Date</th></tr></thead>
-            <tbody id="visitsBody"></tbody>
-          </table>
+          <div id="visitsTableWrap" class="table-scroll" style="display:none;">
+            <table id="visitsTable">
+              <thead><tr><th>Paj</th><th>Referrer</th><th>Date</th></tr></thead>
+              <tbody id="visitsBody"></tbody>
+            </table>
+            <div id="visitPagination" class="visit-pagination">
+              <span id="visitPageInfo" class="visit-page-info"></span>
+              <div>
+                <button class="mini-btn" type="button" id="previousVisitPage">Précédent</button>
+                <button class="mini-btn primary" type="button" id="nextVisitPage">Suivant</button>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="panel">
@@ -385,7 +409,8 @@
       const adminContent = document.getElementById('adminContent');
       const unlockBtn = document.getElementById('unlockBtn');
       const adminPassword = document.getElementById('adminPassword');
-      const state = { password: '', data: null };
+      const state = { password: '', data: null, visitsPage: 1 };
+      const visitsPerPage = 25;
 
       function formatDate(value) {
         if (!value) return '—';
@@ -512,20 +537,31 @@
       }
 
       function renderVisitRows(items) {
-        const table = document.getElementById('visitsTable');
+        const tableWrap = document.getElementById('visitsTableWrap');
         const panel = document.getElementById('visitsPanel');
         const body = document.getElementById('visitsBody');
+        const pageInfo = document.getElementById('visitPageInfo');
+        const previousButton = document.getElementById('previousVisitPage');
+        const nextButton = document.getElementById('nextVisitPage');
         if (!items.length) {
-          table.style.display = 'none';
+          tableWrap.style.display = 'none';
           panel.style.display = 'block';
           body.innerHTML = '';
           return;
         }
-        table.style.display = 'table';
+        const totalPages = Math.ceil(items.length / visitsPerPage);
+        state.visitsPage = Math.min(Math.max(state.visitsPage, 1), totalPages);
+        const start = (state.visitsPage - 1) * visitsPerPage;
+        const pageItems = items.slice(start, start + visitsPerPage);
+
+        tableWrap.style.display = 'block';
         panel.style.display = 'none';
-        body.innerHTML = items.map((item) => `
+        body.innerHTML = pageItems.map((item) => `
           <tr><td>${escapeHtml(item.path)}</td><td>${escapeHtml(item.referrer || 'Direct')}</td><td>${escapeHtml(formatDate(item.created_at))}</td></tr>
         `).join('');
+        pageInfo.textContent = `Paj ${state.visitsPage} sou ${totalPages} · ${items.length} vizit`;
+        previousButton.disabled = state.visitsPage === 1;
+        nextButton.disabled = state.visitsPage === totalPages;
       }
 
       function renderPublicityRows(items) {
@@ -587,6 +623,16 @@
         renderNewsletterRows(state.data.newsletter || []);
         renderVisitRows(state.data.visits || []);
       }
+
+      document.getElementById('previousVisitPage').addEventListener('click', () => {
+        state.visitsPage -= 1;
+        renderVisitRows(state.data?.visits || []);
+      });
+
+      document.getElementById('nextVisitPage').addEventListener('click', () => {
+        state.visitsPage += 1;
+        renderVisitRows(state.data?.visits || []);
+      });
 
       async function loadAdminData() {
         try {

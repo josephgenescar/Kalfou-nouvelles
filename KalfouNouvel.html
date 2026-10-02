@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Kalfou Nouvelles: actualités d'Haïti, politique, économie, société, culture, sport et opinion." />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <link rel="canonical" href="https://kalfou-nouvelles.netlify.app/KalfouNouvel.html" />
+    <link rel="canonical" href="https://kalfou-nouvelles.netlify.app/" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Kalfou Nouvelles | Actualités d'Haïti" />
     <meta property="og:description" content="L'actualité haïtienne expliquée simplement: faits, analyse et opinion." />
-    <meta property="og:url" content="https://kalfou-nouvelles.netlify.app/KalfouNouvel.html" />
+    <meta property="og:url" content="https://kalfou-nouvelles.netlify.app/" />
     <meta property="og:image" content="https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png" />
     <meta property="og:image:alt" content="Logo Kalfou Nouvelles" />
     <meta name="twitter:card" content="summary" />
@@ -511,6 +511,7 @@
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 18px;
       }
+      #articleListStatus { grid-column: 1 / -1; }
       .card a,
       .card article {
         display: block;
@@ -1169,7 +1170,7 @@
         </div>
         <div class="lang-switch">
           <button class="lang-btn active" data-lang="fr">FR</button>
-          <button class="lang-btn" data-lang="ht">KR</button>
+          <button class="lang-btn" data-lang="ht">HT</button>
         </div>
       </div>
     </div>
@@ -1210,7 +1211,7 @@
 
     <nav>
       <div class="container nav-inner">
-        <a href="KalfouNouvel.html" class="active" data-i18n="nav_home">Accueil</a>
+        <a href="/" class="active" data-i18n="nav_home">Accueil</a>
         <a href="article.html" data-i18n="nav_politique">Politique</a>
         <a href="article.html" data-i18n="nav_economie">Économie</a>
         <a href="article.html" data-i18n="nav_societe">Société</a>
@@ -1308,41 +1309,7 @@
         </div>
 
         <section class="cards" id="latest-news">
-          <a href="article.html?demo=video" style="display:block; color:inherit;">
-            <article class="card">
-              <div class="mini-visual"></div>
-              <span class="card-tag">Demo vidéo</span>
-              <h3>Voir comment un article vidéo fonctionne</h3>
-              <div class="meta"><span>Cliquez pour ouvrir le lecteur</span></div>
-            </article>
-          </a>
-
-          <a href="article.html" style="display:block; color:inherit;">
-            <article class="card">
-              <div class="mini-visual v2"></div>
-              <span class="card-tag" data-i18n="tag_economie">Économie</span>
-              <h3 data-i18n="card_title_2">Les commerçants demandent plus de stabilité dans les marchés</h3>
-              <div class="meta"><span data-i18n="card_meta_2">Nadège • 3 heures</span></div>
-            </article>
-          </a>
-
-          <a href="article.html" style="display:block; color:inherit;">
-            <article class="card">
-              <div class="mini-visual v3"></div>
-              <span class="card-tag" data-i18n="tag_culture">Culture</span>
-              <h3 data-i18n="card_title_3">Une exposition met en lumière la créativité haïtienne</h3>
-              <div class="meta"><span data-i18n="card_meta_3">Claudette • 5 heures</span></div>
-            </article>
-          </a>
-
-          <a href="article.html" style="display:block; color:inherit;">
-            <article class="card">
-              <div class="mini-visual v4"></div>
-              <span class="card-tag" data-i18n="tag_societe">Société</span>
-              <h3 data-i18n="card_title_4">Des initiatives locales renforcent l’accès aux services</h3>
-              <div class="meta"><span data-i18n="card_meta_4">Yves • 7 heures</span></div>
-            </article>
-          </a>
+          <p id="articleListStatus" data-i18n="articles_loading" role="status" aria-live="polite">Chargement des derniers articles...</p>
         </section>
 
         <div class="two-columns">
@@ -1405,21 +1372,6 @@
           </div>
         </section>
 
-        <a class="smart-link-banner" href="https://www.profitableratecpmnetwork.com/txptjh17?key=eb38420f53c0f43f93ed22214b754f8e" target="_blank" rel="noopener noreferrer sponsored">
-          <span class="smart-link-banner-copy">
-            <strong>Opportunité en ligne</strong>
-            <h3>Développez vos revenus en ligne</h3>
-            <p>Découvrez une nouvelle façon d’explorer les opportunités digitales.</p>
-          </span>
-          <span class="smart-link-banner-action">Découvrir maintenant</span>
-        </a>
-
-        <section class="native-ad" aria-label="Publicité">
-          <p class="native-ad-label">Publicité</p>
-          <div id="container-3d26312cb531de94ece737118a779b83"></div>
-          <script async="async" data-cfasync="false" src="https://pl31299574.profitableratecpmnetwork.com/3d26312cb531de94ece737118a779b83/invoke.js"></script>
-        </section>
-
         <section class="adsense-slot" aria-label="Publicité Google AdSense" style="margin: 28px auto; max-width: 980px; background: #f7f7f7; border: 1px solid #ebebeb; border-radius: 12px; padding: 16px; text-align: center;">
           <small style="display: block; color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 12px;">Publicité</small>
           <ins class="adsbygoogle"
@@ -1438,7 +1390,10 @@
             <p data-i18n="newsletter_subtitle">Recevez les nouveaux articles et les informations importantes directement par e-mail.</p>
           </div>
           <form class="newsletter-form" id="newsletterForm">
-            <input type="email" name="email" data-placeholder="email" placeholder="Votre e-mail" required />
+            <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+              <label>Leave this field empty <input name="_company_website" type="text" tabindex="-1" autocomplete="off" /></label>
+            </div>
+            <input type="email" name="email" maxlength="254" data-placeholder="email" placeholder="Votre e-mail" required />
             <button type="button" data-i18n="newsletter_button">S’inscrire</button>
           </form>
           <p id="newsletterMessage" aria-live="polite"></p>
@@ -1462,7 +1417,7 @@
         <div class="footer-grid">
           <div class="footer-col">
             <h4 data-i18n="footer_section">Sections</h4>
-            <a href="KalfouNouvel.html" data-i18n="footer_home">Accueil</a>
+            <a href="/" data-i18n="footer_home">Accueil</a>
             <a href="article.html" data-i18n="footer_politique">Politique</a>
             <a href="article.html" data-i18n="footer_economie">Économie</a>
             <a href="article.html" data-i18n="footer_societe">Société</a>
@@ -1474,7 +1429,8 @@
             <a href="soumettre.html">Soumettre</a>
             <a href="contact.html" data-i18n="footer_contact">Contact</a>
             <a href="team.html" data-i18n="footer_team">Équipe</a>
-            <a href="about.html" data-i18n="footer_terms">Mentions légales</a>
+            <a href="editorial.html" data-i18n="footer_editorial">Charte éditoriale</a>
+            <a href="privacy.html" data-i18n="footer_privacy">Confidentialité</a>
           </div>
 
           <div class="footer-col">
@@ -1507,7 +1463,6 @@
     <script>
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-    <script src="https://pl31299573.profitableratecpmnetwork.com/3f/64/44/3f64449ab897c9caa09f9c3133f748f9.js"></script>
     <script src="supabase-config.js"></script>
     <script>
       const translations = {
@@ -1541,6 +1496,9 @@
           side_title_4: 'Les artistes jeunes prennent la parole avec plus de force',
           side_time_4: 'Hier soir',
           latest: 'Dernières infos',
+          articles_loading: 'Chargement des derniers articles...',
+          articles_none: 'Aucun article publié pour le moment.',
+          articles_unavailable: 'Les articles sont indisponibles pour le moment. Réessayez plus tard.',
           see_all: 'Tout voir',
           breaking_head: 'Dernière minute',
           breaking_label_1: 'Politique',
@@ -1595,6 +1553,8 @@
           footer_contact: 'Contact',
           footer_team: 'Équipe',
           footer_terms: 'Mentions légales',
+          footer_editorial: 'Charte éditoriale',
+          footer_privacy: 'Confidentialité',
           footer_follow: 'Suivez-nous',
           footer_media: 'Médias',
           footer_culture: 'Culture',
@@ -1635,6 +1595,9 @@
           side_title_4: 'Jèn atis yo pran paròl ak plis fòs',
           side_time_4: 'Yè aswè',
           latest: 'Dènye nouvèl',
+          articles_loading: 'Dènye atik yo ap chaje...',
+          articles_none: 'Pa gen atik ki pibliye pou kounye a.',
+          articles_unavailable: 'Atik yo pa disponib kounye a. Eseye ankò pita.',
           see_all: 'Wè tout',
           breaking_head: 'Dènye minit',
           breaking_label_1: 'Politik',
@@ -1689,6 +1652,8 @@
           footer_contact: 'Kontak',
           footer_team: 'Ekip',
           footer_terms: 'Lwa ak règ',
+          footer_editorial: 'Angajman editoryal',
+          footer_privacy: 'Konfidansyalite',
           footer_follow: 'Swiv nou',
           footer_media: 'Medya',
           footer_culture: 'Kilti',
@@ -1711,6 +1676,10 @@
           const key = el.dataset.placeholder;
           if (selected[key]) el.placeholder = selected[key];
         });
+        const articleListStatus = document.getElementById('articleListStatus');
+        if (articleListStatus?.dataset.messageKey) {
+          articleListStatus.textContent = selected[articleListStatus.dataset.messageKey];
+        }
         document.documentElement.lang = lang === 'ht' ? 'ht' : 'fr';
         document.querySelectorAll('.lang-btn').forEach((btn) => {
           btn.classList.toggle('active', btn.dataset.lang === lang);
@@ -1906,25 +1875,41 @@
             throw new Error('Backend Express indisponib sou Netlify.');
           }
           const result = await response.json();
-          if (!Array.isArray(result.articles) || !result.articles.length) return;
+          if (!Array.isArray(result.articles) || !result.articles.length) {
+            setArticleListStatus('articles_none');
+            return;
+          }
           renderPublishedArticles(result.articles);
         } catch (error) {
           try {
             const config = window.SUPABASE_CONFIG;
-            if (!config) return;
+            if (!config) throw error;
             const response = await fetch(`${config.url}/rest/v1/articles?select=id,author,email,title,category,summary,content,status,created_at,image_url,media_url,media_type&status=eq.published&order=created_at.desc`, {
               headers: {
                 apikey: config.anonKey,
                 Authorization: `Bearer ${config.anonKey}`
               }
             });
-            if (!response.ok) return;
+            if (!response.ok) throw new Error('Supabase pa disponib.');
             const rows = await response.json();
-            if (!Array.isArray(rows) || !rows.length) return;
+            if (!Array.isArray(rows) || !rows.length) {
+              setArticleListStatus('articles_none');
+              return;
+            }
             renderPublishedArticles(rows.map((article) => ({ ...article, createdAt: article.created_at })));
           } catch (supabaseError) {
             console.error('Unable to load published articles:', supabaseError);
+            setArticleListStatus('articles_unavailable');
           }
+        }
+      }
+
+      function setArticleListStatus(messageKey) {
+        const status = document.getElementById('articleListStatus');
+        const language = localStorage.getItem('kalfou-language') || 'fr';
+        if (status) {
+          status.dataset.messageKey = messageKey;
+          status.textContent = translations[language][messageKey];
         }
       }
 
@@ -1942,7 +1927,13 @@
           if (heroTitle) heroTitle.textContent = featured.title || heroTitle.textContent;
           if (heroText) heroText.textContent = featured.summary || heroText.textContent;
           if (heroMeta) {
-            heroMeta.innerHTML = `<span><strong>${featured.author || 'Rédaction'}</strong></span><span>${formatDisplayDate(featured.createdAt)} • ${featured.category || 'Actualité'}</span>`;
+            const authorMeta = document.createElement('span');
+            const authorName = document.createElement('strong');
+            authorName.textContent = featured.author || 'Rédaction';
+            authorMeta.appendChild(authorName);
+            const dateMeta = document.createElement('span');
+            dateMeta.textContent = `${formatDisplayDate(featured.createdAt)} • ${featured.category || 'Actualité'}`;
+            heroMeta.replaceChildren(authorMeta, dateMeta);
           }
 
           const featuredImage = document.querySelector('.hero-image');
@@ -2003,20 +1994,6 @@
             fragment.appendChild(articleLink);
           });
 
-          const demoLink = document.createElement('a');
-          demoLink.href = 'article.html?demo=video';
-          demoLink.style.display = 'block';
-          demoLink.style.color = 'inherit';
-          demoLink.innerHTML = `
-            <article class="card">
-              <div class="mini-visual" style="background:linear-gradient(135deg, #111, #555); display:grid; place-items:center; color:#fff; font-weight:800; letter-spacing:.12em;">VIDEO</div>
-              <span class="card-tag">Demo vidéo</span>
-              <h3>Voir comment un article vidéo fonctionne</h3>
-              <div class="meta"><span>Cliquez pour ouvrir le lecteur</span></div>
-            </article>
-          `;
-          fragment.appendChild(demoLink);
-
           cardsContainer.innerHTML = '';
           cardsContainer.appendChild(fragment);
       }
@@ -2047,7 +2024,10 @@
           const response = await fetch('/api/newsletter', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: new FormData(newsletterForm).get('email') })
+            body: JSON.stringify({
+              email: new FormData(newsletterForm).get('email'),
+              _company_website: new FormData(newsletterForm).get('_company_website')
+            })
           });
           const result = await response.json();
           if (!response.ok) throw new Error(result.message || 'Inscription impossible.');

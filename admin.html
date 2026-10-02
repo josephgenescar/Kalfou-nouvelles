@@ -238,13 +238,13 @@
         <div class="container topbar-inner">
           <span>Mardi, 26 août 2026</span>
           <span>Port-au-Prince • 31°C</span>
-          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">KR</button></span>
+          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">HT</button></span>
         </div>
       </div>
       <div class="container nav-wrap">
         <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
         <nav class="nav">
-          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="/">Accueil</a>
           <a href="soumettre.html">Soumettre</a>
           <a href="publicite.html">Publicité</a>
           <a href="contact.html">Contact</a>
@@ -262,6 +262,9 @@
         </div>
 
         <div id="adminContent" class="hidden">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+            <button class="mini-btn" type="button" id="logoutBtn">Se déconnecter</button>
+          </div>
           <div class="stats">
           <div class="stat-card">
             <h3>Articles</h3>
@@ -292,12 +295,12 @@
         <section class="panel">
           <h2>Publier un article</h2>
           <form id="ownerArticleForm">
-            <input name="author" value="Kalfou Nouvelles" required placeholder="Auteur" />
-            <input name="email" type="email" required placeholder="E-mail de rédaction" />
-            <input name="title" required placeholder="Titre de l’article" />
-            <input name="category" required placeholder="Catégorie" />
-            <textarea name="summary" required placeholder="Résumé"></textarea>
-            <textarea name="content" required placeholder="Contenu de l’article"></textarea>
+            <input name="author" value="Kalfou Nouvelles" maxlength="120" required placeholder="Auteur" />
+            <input name="email" type="email" maxlength="254" required placeholder="E-mail de rédaction" />
+            <input name="title" maxlength="180" required placeholder="Titre de l’article" />
+            <input name="category" maxlength="80" required placeholder="Catégorie" />
+            <textarea name="summary" maxlength="500" required placeholder="Résumé"></textarea>
+            <textarea name="content" maxlength="50000" required placeholder="Contenu de l’article"></textarea>
             <label style="display:flex; align-items:center; gap:8px; margin:10px 0; font-weight:700;">
               <input name="isFeatured" type="checkbox" value="true" /> Mettre cet article à la une
             </label>
@@ -411,7 +414,7 @@
       const adminContent = document.getElementById('adminContent');
       const unlockBtn = document.getElementById('unlockBtn');
       const adminPassword = document.getElementById('adminPassword');
-      const state = { password: '', data: null, visitsPage: 1 };
+      const state = { data: null, visitsPage: 1 };
       const visitsPerPage = 25;
 
       function formatDate(value) {
@@ -433,7 +436,7 @@
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, password: state.password })
+          body: JSON.stringify(payload)
         });
 
         const result = await response.json();
@@ -651,7 +654,7 @@
           const response = await fetch('/api/admin/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password: state.password })
+            body: JSON.stringify({})
           });
 
           const result = await response.json();
@@ -681,7 +684,7 @@
             throw new Error(result.message || 'Mot de passe incorrect.');
           }
 
-          state.password = password;
+          adminPassword.value = '';
           authBox.classList.add('hidden');
           adminContent.classList.remove('hidden');
           await loadAdminData();
@@ -746,6 +749,12 @@
 
       document.addEventListener('click', handleAction);
       unlockBtn.addEventListener('click', unlockAdmin);
+      document.getElementById('logoutBtn').addEventListener('click', async () => {
+        await fetch('/api/admin/logout', { method: 'POST' });
+        state.data = null;
+        adminContent.classList.add('hidden');
+        authBox.classList.remove('hidden');
+      });
       document.getElementById('ownerArticleForm').addEventListener('submit', (event) => {
         event.preventDefault();
         createOwnerArticle('published');

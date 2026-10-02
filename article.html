@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="noindex, follow, max-image-preview:large" />
     <meta name="description" content="Li dènye atik ak analiz Kalfou Nouvelles sou aktyalite Ayiti." />
     <link rel="canonical" href="https://kalfou-nouvelles.netlify.app/article.html" />
     <meta property="og:type" content="article" />
@@ -89,6 +89,7 @@
         border: 1px solid var(--line);
         padding: 28px;
       }
+      .article-shell:not(.loaded) > :not(#articleStatus) { display: none; }
       .tag {
         display: inline-block;
         background: var(--red);
@@ -243,13 +244,13 @@
         <div class="container topbar-inner">
           <span>Mardi, 26 août 2026</span>
           <span>Port-au-Prince • 31°C</span>
-          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">KR</button></span>
+          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">HT</button></span>
         </div>
       </div>
       <div class="container nav-wrap">
         <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
         <nav class="nav">
-          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="/">Accueil</a>
           <a href="article.html">Politique</a>
           <a href="publicite.html">Publicité</a>
           <a href="soumettre.html">Soumettre</a>
@@ -261,9 +262,10 @@
     <main>
       <div class="container">
         <article class="article-shell">
-          <div class="tag">Politique • Analyse</div>
-          <h1>La crise politique de Haïti met à rude épreuve l’avenir du pays</h1>
-          <div class="meta">Par Marie-Claire Estimé • 18 août 2026 • 8 min de lecture</div>
+          <p id="articleStatus" role="status" aria-live="polite">Chargement de l’article...</p>
+          <div class="tag"></div>
+          <h1></h1>
+          <div class="meta"></div>
           <div class="article-media" id="articleMedia"></div>
           <div class="share-box" aria-label="Partager cet article">
             <span class="share-label">Partager</span>
@@ -276,11 +278,6 @@
           </div>
 
           <div class="article-body">
-            <p>Alors que les institutions restent fragiles, la question de la gouvernance et de la confiance nationale revient au centre du débat. Les citoyens réclament plus de clarté, plus de justice et surtout des réponses concrètes à des problèmes qui s’accumulent depuis plusieurs mois.</p>
-            <p>Le pays se trouve dans une période de tension où chaque décision publique est vue à travers le prisme de l’urgence sociale. Les enjeux sont multiples : sécurité, économie, éducation, santé, accès à l’eau, stabilité institutionnelle. À ce rythme, l’absence de perspective claire devient elle-même un facteur de fatigue.</p>
-            <p>Les responsables politiques doivent aujourd’hui choisir entre discours rassurants et transformations profondes. Car si le pays continue d’attendre sans avancer, la crise ne sera plus seulement politique, elle deviendra structurelle.</p>
-            <p>Les citoyens ne demandent pas seulement des promesses. Ils veulent des institutions capables de rassurer, de répondre et de protéger. C’est dans ce cadre qu’une véritable refonte du débat public devient nécessaire : plus d’échanges de slogans, plus de décisions à court terme, et davantage de cohérence entre les paroles et les actes.</p>
-            <p>Haïti a besoin de sérieux, de stabilité et de vision. L’avenir ne dépend pas seulement de ceux qui gouvernent, mais aussi de la capacité de tout le pays à reconstruire un cadre de confiance commun.</p>
           </div>
         </article>
 
@@ -288,15 +285,6 @@
           <div class="related">
             <h3>À lire aussi</h3>
             <div class="related-list">
-              <div class="related-item">
-                <h4>Le dollar continue d’influencer chaque achat du quotidien</h4>
-              </div>
-              <div class="related-item">
-                <h4>L’agriculture locale reçoit un nouvel appui technologique</h4>
-              </div>
-              <div class="related-item">
-                <h4>La diaspora crée des réseaux de solidarité économique</h4>
-              </div>
             </div>
           </div>
 
@@ -324,6 +312,8 @@
           <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" style="width:150px;" />
         </div>
         <div>© 2026 Kalfou Nouvelles</div>
+        <a href="editorial.html">Charte éditoriale</a>
+        <a href="privacy.html">Confidentialité</a>
           <a href="https://whatsapp.com/channel/0029Vb8PdkXATRSec1zorX1Q" target="_blank" rel="noopener" aria-label="Channel WhatsApp" title="Channel WhatsApp" style="color:#25d366; font-size:0;"><svg viewBox="0 0 32 32" width="32" height="32" fill="currentColor" aria-hidden="true"><path d="M16 3.2A12.8 12.8 0 0 0 5 22.5L3.5 28.4l6-1.5A12.8 12.8 0 1 0 16 3.2Zm0 23.3a10.5 10.5 0 0 1-5.4-1.5l-.4-.2-3.5.9.9-3.4-.2-.4A10.5 10.5 0 1 1 16 26.5Zm5.8-7.8c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-.9 1.2-.3.2-.6.1a8.6 8.6 0 0 1-2.5-1.5 9.5 9.5 0 0 1-1.7-2.1c-.2-.4 0-.5.2-.7l.5-.6c.2-.2.2-.3.3-.6s0-.4-.1-.6c-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.5 1.9.6.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.4s-.3-.2-.6-.4Z"/></svg></a>
       </div>
     </footer>
@@ -332,8 +322,25 @@
     <script>
       (window.adsbygoogle = window.adsbygoogle || []).push({});
     </script>
-    <script src="https://pl31299573.profitableratecpmnetwork.com/3f/64/44/3f64449ab897c9caa09f9c3133f748f9.js"></script>
     <script>
+      const articleMessages = {
+        fr: {
+          missing: 'Cet article est introuvable ou n’est pas publié.',
+          none: 'Aucun article publié pour le moment.',
+          unavailable: 'Les articles sont indisponibles pour le moment. Réessayez plus tard.'
+        },
+        ht: {
+          missing: 'Atik sa a pa jwenn oswa li pa pibliye.',
+          none: 'Pa gen atik ki pibliye pou kounye a.',
+          unavailable: 'Atik yo pa disponib kounye a. Eseye ankò pita.'
+        }
+      };
+
+      function articleMessage(key) {
+        const language = localStorage.getItem('kalfou-language') === 'ht' ? 'ht' : 'fr';
+        return articleMessages[language][key];
+      }
+
       function formatDisplayDate(value) {
         if (!value) return 'Aujourd’hui';
         const date = new Date(value);
@@ -355,7 +362,9 @@
         const title = article.title || 'Article | Kalfou Nouvelles';
         const description = article.summary || 'Li dènye atik ak analiz Kalfou Nouvelles sou aktyalite Ayiti.';
         const mediaUrl = article.mediaUrl || article.media_url || article.image_url || 'https://kalfou-nouvelles.netlify.app/image/logo-kalfou.png';
-        const articleUrl = window.location.href.split('#')[0];
+        const articleUrl = article.id
+          ? `${window.location.origin}${window.location.pathname}?id=${encodeURIComponent(article.id)}`
+          : `${window.location.origin}${window.location.pathname}`;
         const publishedAt = article.createdAt || article.created_at || new Date().toISOString();
 
         document.title = `${title} | Kalfou Nouvelles`;
@@ -432,6 +441,10 @@
       function renderArticle(article) {
         if (!article) return;
 
+        const articleShell = document.querySelector('.article-shell');
+        const articleStatus = document.getElementById('articleStatus');
+        articleShell.classList.add('loaded');
+        articleStatus.hidden = true;
         setArticleSeo(article);
         configureArticleSharing(article);
 
@@ -467,7 +480,11 @@
 
         if (body) {
           const paragraphs = (article.content || article.summary || '').split(/\n+/).filter(Boolean);
-          body.innerHTML = paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join('');
+          body.replaceChildren(...paragraphs.map((paragraph) => {
+            const element = document.createElement('p');
+            element.textContent = paragraph;
+            return element;
+          }));
         }
 
         if (quote) {
@@ -478,16 +495,17 @@
       async function loadArticle() {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
+        const articleStatus = document.getElementById('articleStatus');
 
         if (params.get('demo') === 'video') {
           setRobotsContent('noindex, nofollow');
           renderArticle({
-            title: 'Demo: yon atik ak videyo',
+            title: localStorage.getItem('kalfou-language') === 'ht' ? 'Demo: yon atik ak videyo' : 'Démo : un article avec vidéo',
             author: 'Kalfou Nouvelles',
-            category: 'Demo vidéo',
+            category: localStorage.getItem('kalfou-language') === 'ht' ? 'Demo videyo' : 'Démo vidéo',
             createdAt: new Date().toISOString(),
-            summary: 'Men fason yon videyo ap parèt nan menm espas medya atik la.',
-            content: 'Videyo sa a se yon demonstrasyon lokal pou verifye layout la. Lè ImageKit la aktive, URL videyo a ap soti dirèkteman nan ImageKit.',
+            summary: localStorage.getItem('kalfou-language') === 'ht' ? 'Men fason yon videyo ap parèt nan menm espas medya atik la.' : 'Voici comment une vidéo s’affiche dans l’espace média d’un article.',
+            content: localStorage.getItem('kalfou-language') === 'ht' ? 'Videyo sa a se yon demonstrasyon lokal pou verifye layout la. Lè ImageKit la aktive, URL videyo a ap soti dirèkteman nan ImageKit.' : 'Cette vidéo est une démonstration locale. Lorsque ImageKit sera configuré, son adresse proviendra directement de ce service.',
             mediaUrl: 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
             mediaType: 'video'
           });
@@ -497,39 +515,42 @@
         if (!id) setRobotsContent('noindex, follow');
 
         try {
-          let url = '/api/public/articles';
-          if (id) {
-            url = `/api/public/articles/${encodeURIComponent(id)}`;
-          }
-
-          const response = await fetch(url);
+          const response = await fetch(id ? `/api/public/articles/${encodeURIComponent(id)}` : '/api/public/articles');
           const result = await response.json();
 
-          if (!response.ok || !result.article) {
-            const fallback = await fetch('/api/public/articles');
-            const fallbackResult = await fallback.json();
-            if (fallbackResult.articles && fallbackResult.articles.length) {
-              renderArticle(fallbackResult.articles[0]);
-              return;
-            }
-            return;
+          if (!response.ok) {
+            throw new Error(id ? articleMessage('missing') : articleMessage('unavailable'));
           }
 
-          renderArticle(result.article);
+          const article = id ? result.article : result.articles?.[0];
+          if (!article) {
+            throw new Error(id ? articleMessage('missing') : articleMessage('none'));
+          }
+
+          renderArticle(article);
+          if (id) setRobotsContent('index, follow, max-image-preview:large');
 
           const relatedResponse = await fetch('/api/public/articles');
           const relatedResult = await relatedResponse.json();
           const relatedList = document.querySelector('.related-list');
           if (relatedList && relatedResult.articles) {
-            const otherArticles = relatedResult.articles.filter((item) => item.id !== result.article.id).slice(0, 3);
-            relatedList.innerHTML = otherArticles.map((article) => `
-              <div class="related-item">
-                <h4><a href="article.html?id=${encodeURIComponent(article.id)}">${article.title}</a></h4>
-              </div>
-            `).join('');
+            const otherArticles = relatedResult.articles.filter((item) => item.id !== article.id).slice(0, 3);
+            relatedList.replaceChildren(...otherArticles.map((article) => {
+              const item = document.createElement('div');
+              item.className = 'related-item';
+              const heading = document.createElement('h4');
+              const link = document.createElement('a');
+              link.href = `article.html?id=${encodeURIComponent(article.id)}`;
+              link.textContent = article.title || 'Article';
+              heading.appendChild(link);
+              item.appendChild(heading);
+              return item;
+            }));
           }
         } catch (error) {
           console.error('Chargement article impossible:', error);
+          const expectedMessages = Object.values(articleMessages).flat();
+          articleStatus.textContent = expectedMessages.includes(error.message) ? error.message : articleMessage('unavailable');
         }
       }
 

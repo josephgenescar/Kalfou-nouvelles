@@ -1,4 +1,10 @@
 [[redirects]]
+  from = "/"
+  to = "/KalfouNouvel.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/api/*"
   to = "https://kalfou-nouvelles-backend.onrender.com/api/:splat"
   status = 200

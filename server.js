@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const { randomUUID } = require('crypto');
+const { randomUUID, createHmac, timingSafeEqual } = require('crypto');
 const cors = require('cors');
 const multer = require('multer');
 
@@ -23,12 +23,15 @@ const PUBLICITY_PLACEMENTS = ['home_top', 'home_sidebar', 'home_between_sections
 const PUBLICITY_PLANS = ['basic', 'premium', 'elite'];
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
+const ADMIN_SESSION_COOKIE = 'kalfou_admin_session';
+const ADMIN_SESSION_TTL_SECONDS = 12 * 60 * 60;
+const submissionAttempts = new Map();
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 100 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, callback) => callback(null, /^(image\/(jpeg|png|webp|gif)|video\/(mp4|webm|quicktime))$/.test(file.mimetype))
 });
 
@@ -324,7 +327,88 @@ function writeData(data) {
 }
 
 function validatePassword(password) {
-  return Boolean(ADMIN_PASSWORD) && String(password || '') === ADMIN_PASSWORD;
+  if (!ADMIN_PASSWORD || typeof password !== 'string') return false;
+  const supplied = Buffer.from(password);
+  const expected = Buffer.from(ADMIN_PASSWORD);
+  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
+}
+
+function createAdminSession(expiresAt) {
+  const value = String(expiresAt);
+  const signature = createHmac('sha256', ADMIN_PASSWORD).update(value).digest('hex');
+  return `${value}.${signature}`;
+}
+
+function hasAdminSession(req) {
+  if (!ADMIN_PASSWORD) return false;
+  const cookie = (req.headers.cookie || '').split(';').map((part) => part.trim())
+    .find((part) => part.startsWith(`${ADMIN_SESSION_COOKIE}=`));
+  if (!cookie) return false;
+
+  let token;
+  try {
+    token = decodeURIComponent(cookie.slice(ADMIN_SESSION_COOKIE.length + 1));
+  } catch {
+    return false;
+  }
+  const [expiresAt, suppliedSignature] = token.split('.');
+  if (!expiresAt || !suppliedSignature) return false;
+  const expiry = Number(expiresAt);
+  if (!Number.isFinite(expiry) || expiry <= Date.now() || expiry > Date.now() + ADMIN_SESSION_TTL_SECONDS * 1000) return false;
+
+  const expectedSignature = createHmac('sha256', ADMIN_PASSWORD).update(expiresAt).digest();
+  let actualSignature;
+  try {
+    actualSignature = Buffer.from(suppliedSignature, 'hex');
+  } catch {
+    return false;
+  }
+  return actualSignature.length === expectedSignature.length && timingSafeEqual(actualSignature, expectedSignature);
+}
+
+function setAdminSessionCookie(res, token) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `${ADMIN_SESSION_COOKIE}=${encodeURIComponent(token)}; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=${ADMIN_SESSION_TTL_SECONDS}${secure}`);
+}
+
+function clearAdminSessionCookie(res) {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `${ADMIN_SESSION_COOKIE}=; Path=/api/admin; HttpOnly; SameSite=Strict; Max-Age=0${secure}`);
+}
+
+function requireAdmin(req, res) {
+  if (hasAdminSession(req)) return true;
+  res.status(401).json({ ok: false, message: 'Session expirée. Reconnectez-vous.' });
+  return false;
+}
+
+function hasSpamTrap(req, res) {
+  if (!String(req.body?._company_website || '').trim()) return false;
+  res.status(200).json({ ok: true, message: 'Mèsi, demann ou an resevwa.' });
+  return true;
+}
+
+function fieldsExceedLimits(fields, limits) {
+  return Object.entries(limits).some(([field, max]) => String(fields[field] || '').length > max);
+}
+
+function isValidEmail(email) {
+  return /^\S+@\S+\.\S+$/.test(String(email || '').trim());
+}
+
+function isSubmissionRateLimited(endpoint, email) {
+  const key = `${endpoint}:${String(email).trim().toLowerCase()}`;
+  const now = Date.now();
+  const recent = (submissionAttempts.get(key) || []).filter((timestamp) => now - timestamp < 60 * 60 * 1000);
+  if (recent.length >= 3) return true;
+  recent.push(now);
+  submissionAttempts.set(key, recent);
+  if (submissionAttempts.size > 5000) {
+    for (const [entryKey, timestamps] of submissionAttempts) {
+      if (!timestamps.some((timestamp) => now - timestamp < 60 * 60 * 1000)) submissionAttempts.delete(entryKey);
+    }
+  }
+  return false;
 }
 
 app.get('/api/health', (req, res) => {
@@ -337,7 +421,12 @@ app.get('/api/health', (req, res) => {
 
 app.post('/api/contact', async (req, res) => {
   const { name, email, subject, message } = req.body || {};
+  if (hasSpamTrap(req, res)) return;
   if (!name || !email || !subject || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
+  if (fieldsExceedLimits({ name, email, subject, message }, { name: 120, email: 254, subject: 200, message: 5000 }) || !isValidEmail(email)) {
+    return res.status(400).json({ ok: false, message: 'Vérifiez la longueur des champs et l’adresse e-mail.' });
+  }
+  if (isSubmissionRateLimited('contact', email)) return res.status(429).json({ ok: false, message: 'Trop de demandes. Réessayez plus tard.' });
   if (!requireSupabase(res)) return;
   try {
     const contact = { name: String(name).trim(), email: String(email).trim(), subject: String(subject).trim(), message: String(message).trim() };
@@ -353,7 +442,15 @@ app.post('/api/contact', async (req, res) => {
 
 app.post('/api/articles', upload.single('image'), async (req, res) => {
   const { author, email, title, category, summary, content, mediaDuration } = req.body || {};
+  if (hasSpamTrap(req, res)) return;
   if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
+  if (fieldsExceedLimits({ author, email, title, category, summary, content }, { author: 120, email: 254, title: 180, category: 80, summary: 500, content: 50000 }) || !isValidEmail(email)) {
+    return res.status(400).json({ ok: false, message: 'Vérifiez la longueur des champs et l’adresse e-mail.' });
+  }
+  if (isSubmissionRateLimited('article', email)) return res.status(429).json({ ok: false, message: 'Trop de soumissions. Réessayez plus tard.' });
+  if (req.file && req.file.mimetype.startsWith('image/') && req.file.size > 8 * 1024 * 1024) {
+    return res.status(400).json({ ok: false, message: 'L’image ne peut pas dépasser 8 Mo.' });
+  }
   if (!requireSupabase(res)) return;
   try {
     const duration = Number(mediaDuration || 0);
@@ -372,9 +469,12 @@ app.post('/api/articles', upload.single('image'), async (req, res) => {
 });
 
 app.post('/api/admin/articles', async (req, res) => {
-  const { password, author, email, title, category, summary, content, status, isFeatured } = req.body || {};
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  const { author, email, title, category, summary, content, status, isFeatured } = req.body || {};
+  if (!requireAdmin(req, res)) return;
   if (!author || !email || !title || !category || !summary || !content) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
+  if (fieldsExceedLimits({ author, email, title, category, summary, content }, { author: 120, email: 254, title: 180, category: 80, summary: 500, content: 50000 }) || !isValidEmail(email)) {
+    return res.status(400).json({ ok: false, message: 'Vérifiez la longueur des champs et l’adresse e-mail.' });
+  }
   if (!['pending', 'published'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
   if (!requireSupabase(res)) return;
   try {
@@ -395,7 +495,18 @@ app.post('/api/admin/articles', async (req, res) => {
 
 app.post('/api/publicity', upload.single('image'), async (req, res) => {
   const { companyName, company, email, websiteUrl, type, message, placement, plan, startsAt, endsAt } = req.body || {};
+  if (hasSpamTrap(req, res)) return;
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
+  if (fieldsExceedLimits({ companyName, company, email, websiteUrl, type, message }, { companyName: 120, company: 160, email: 254, websiteUrl: 2048, type: 100, message: 5000 }) || !isValidEmail(email)) {
+    return res.status(400).json({ ok: false, message: 'Vérifiez la longueur des champs et l’adresse e-mail.' });
+  }
+  if (isSubmissionRateLimited('publicity', email)) return res.status(429).json({ ok: false, message: 'Trop de demandes. Réessayez plus tard.' });
+  if (req.file && !req.file.mimetype.startsWith('image/')) {
+    return res.status(400).json({ ok: false, message: 'Seules les images sont acceptées pour une demande de publicité.' });
+  }
+  if (req.file && req.file.size > 5 * 1024 * 1024) {
+    return res.status(400).json({ ok: false, message: 'L’image de publicité ne peut pas dépasser 5 Mo.' });
+  }
   if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
   const validPlacement = normalizePlacement(placement);
   const validPlan = normalizePlan(plan);
@@ -432,9 +543,11 @@ app.post('/api/publicity', upload.single('image'), async (req, res) => {
 
 app.post('/api/newsletter', async (req, res) => {
   const email = String(req.body?.email || '').trim().toLowerCase();
-  if (!/^\S+@\S+\.\S+$/.test(email)) {
+  if (hasSpamTrap(req, res)) return;
+  if (email.length > 254 || !isValidEmail(email)) {
     return res.status(400).json({ ok: false, message: 'Veuillez entrer une adresse e-mail valide.' });
   }
+  if (isSubmissionRateLimited('newsletter', email)) return res.status(429).json({ ok: false, message: 'Trop de demandes. Réessayez plus tard.' });
   if (!requireSupabase(res)) return;
   if (!BREVO_API_KEY || !BREVO_LIST_ID) {
     return res.status(503).json({ ok: false, message: 'Newsletter pa konfigire sou backend lan.' });
@@ -497,12 +610,20 @@ app.post('/api/track-visit', async (req, res) => {
 });
 
 app.post('/api/admin/login', (req, res) => {
-  if (validatePassword(req.body?.password)) return res.json({ ok: true, message: 'Authentification réussie.' });
+  if (validatePassword(req.body?.password)) {
+    setAdminSessionCookie(res, createAdminSession(Date.now() + ADMIN_SESSION_TTL_SECONDS * 1000));
+    return res.json({ ok: true, message: 'Authentification réussie.' });
+  }
   return res.status(401).json({ ok: false, message: 'Mot de passe incorrect.' });
 });
 
+app.post('/api/admin/logout', (req, res) => {
+  clearAdminSessionCookie(res);
+  res.json({ ok: true });
+});
+
 app.post('/api/admin/data', async (req, res) => {
-  if (!validatePassword(req.body?.password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  if (!requireAdmin(req, res)) return;
   if (!requireSupabase(res)) return;
   try {
     const [articles, contacts, publicity, newsletter, visits, todayVisits] = await Promise.all([
@@ -549,8 +670,8 @@ app.get('/api/public/articles/:id', async (req, res) => {
 });
 
 app.post('/api/admin/articles/:id/status', async (req, res) => {
-  const { password, status } = req.body || {};
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  const { status } = req.body || {};
+  if (!requireAdmin(req, res)) return;
   if (!['pending', 'published', 'rejected'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
   if (!requireSupabase(res)) return;
   try {
@@ -567,8 +688,8 @@ app.post('/api/admin/articles/:id/status', async (req, res) => {
 });
 
 app.post('/api/admin/articles/:id/featured', async (req, res) => {
-  const { password, featured } = req.body || {};
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  const { featured } = req.body || {};
+  if (!requireAdmin(req, res)) return;
   if (!requireSupabase(res)) return;
   try {
     const shouldFeature = featured === true || featured === 'true';
@@ -586,8 +707,8 @@ app.post('/api/admin/articles/:id/featured', async (req, res) => {
 });
 
 app.post('/api/admin/publicity/:id/status', async (req, res) => {
-  const { password, status } = req.body || {};
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  const { status } = req.body || {};
+  if (!requireAdmin(req, res)) return;
   if (!['pending', 'published', 'rejected'].includes(status)) return res.status(400).json({ ok: false, message: 'Statut invalide.' });
   if (!requireSupabase(res)) return;
   try {
@@ -598,8 +719,8 @@ app.post('/api/admin/publicity/:id/status', async (req, res) => {
 });
 
 app.post('/api/admin/publicity/:id/update', async (req, res) => {
-  const { password, companyName, company, email, websiteUrl, type, message, placement, plan, startsAt, endsAt } = req.body || {};
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+  const { companyName, company, email, websiteUrl, type, message, placement, plan, startsAt, endsAt } = req.body || {};
+  if (!requireAdmin(req, res)) return;
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
   if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
   const validPlacement = normalizePlacement(placement);
@@ -632,8 +753,8 @@ app.post('/api/admin/publicity/:id/update', async (req, res) => {
   } catch (error) { handleServerError(res, error); }
 });
 
-async function deleteAdminRow(table, id, password, res, label) {
-  if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
+async function deleteAdminRow(table, id, req, res, label) {
+  if (!requireAdmin(req, res)) return;
   if (!requireSupabase(res)) return;
   try {
     const rows = await supabaseRequest(`${table}?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Prefer: 'return=representation' } });
@@ -642,9 +763,11 @@ async function deleteAdminRow(table, id, password, res, label) {
   } catch (error) { handleServerError(res, error); }
 }
 
-app.post('/api/admin/articles/:id/delete', (req, res) => deleteAdminRow('articles', req.params.id, req.body?.password, res, 'Article'));
-app.post('/api/admin/contacts/:id/delete', (req, res) => deleteAdminRow('contacts', req.params.id, req.body?.password, res, 'Message'));
-app.post('/api/admin/publicity/:id/delete', (req, res) => deleteAdminRow('publicity', req.params.id, req.body?.password, res, 'Demande'));
+app.post('/api/admin/articles/:id/delete', (req, res) => deleteAdminRow('articles', req.params.id, req, res, 'Article'));
+app.post('/api/admin/contacts/:id/delete', (req, res) => deleteAdminRow('contacts', req.params.id, req, res, 'Message'));
+app.post('/api/admin/publicity/:id/delete', (req, res) => deleteAdminRow('publicity', req.params.id, req, res, 'Demande'));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'KalfouNouvel.html')));
 
 app.use(express.static(__dirname));
 

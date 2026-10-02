@@ -224,13 +224,13 @@
         <div class="container topbar-inner">
           <span>Mardi, 26 août 2026</span>
           <span>Port-au-Prince • 31°C</span>
-          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">KR</button></span>
+          <span><button data-site-lang="fr" class="active" style="padding:5px 8px;">FR</button><button data-site-lang="ht" style="padding:5px 8px;">HT</button></span>
         </div>
       </div>
       <div class="container nav-wrap">
         <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" />
         <nav class="nav">
-          <a href="KalfouNouvel.html">Accueil</a>
+          <a href="/">Accueil</a>
           <a href="article.html">Politique</a>
           <a href="about.html">À propos</a>
           <a href="publicite.html">Publicité</a>
@@ -295,21 +295,24 @@
           <div>
             <h2 style="margin-top:0; font-size:32px;">Demander une campagne</h2>
             <form id="publicityForm">
+              <div aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;">
+                <label>Leave this field empty <input name="_company_website" type="text" tabindex="-1" autocomplete="off" /></label>
+              </div>
               <div class="field">
                 <label for="companyName">Nom</label>
-                <input id="companyName" name="companyName" type="text" placeholder="Votre nom" required />
+                <input id="companyName" name="companyName" type="text" maxlength="120" placeholder="Votre nom" required />
               </div>
               <div class="field">
                 <label for="company">Entreprise</label>
-                <input id="company" name="company" type="text" placeholder="Nom de votre entreprise" required />
+                <input id="company" name="company" type="text" maxlength="160" placeholder="Nom de votre entreprise" required />
               </div>
               <div class="field">
                 <label for="email">Email</label>
-                <input id="email" name="email" type="email" placeholder="votre@email.com" required />
+                <input id="email" name="email" type="email" maxlength="254" placeholder="votre@email.com" required />
               </div>
               <div class="field">
                 <label for="websiteUrl">Site web (optionnel)</label>
-                <input id="websiteUrl" name="websiteUrl" type="url" placeholder="https://votresite.com" />
+                <input id="websiteUrl" name="websiteUrl" type="url" maxlength="2048" placeholder="https://votresite.com" />
               </div>
               <div class="field">
                 <label for="type">Type de partenariat</label>
@@ -350,7 +353,7 @@
               </div>
               <div class="field">
                 <label for="message">Message</label>
-                <textarea id="message" name="message" placeholder="Décrivez votre besoin..." required></textarea>
+                <textarea id="message" name="message" maxlength="5000" placeholder="Décrivez votre besoin..." required></textarea>
               </div>
               <div class="field">
                 <label for="image">Image de la publicité (JPG, PNG, WEBP, GIF, 5 Mo maximum)</label>
@@ -380,6 +383,8 @@
           <img class="site-logo" src="image/logo-kalfou.png" alt="Kalfou Nouvelles" style="width:150px;" />
         </div>
         <div>© 2026 Kalfou Nouvelles</div>
+        <a href="editorial.html">Charte éditoriale</a>
+        <a href="privacy.html">Confidentialité</a>
         <a href="https://whatsapp.com/channel/0029Vb8PdkXATRSec1zorX1Q" target="_blank" rel="noopener" aria-label="Channel WhatsApp" title="Channel WhatsApp" style="color:#25d366; font-size:0;"><svg viewBox="0 0 32 32" width="32" height="32" fill="currentColor" aria-hidden="true"><path d="M16 3.2A12.8 12.8 0 0 0 5 22.5L3.5 28.4l6-1.5A12.8 12.8 0 1 0 16 3.2Zm0 23.3a10.5 10.5 0 0 1-5.4-1.5l-.4-.2-3.5.9.9-3.4-.2-.4A10.5 10.5 0 1 1 16 26.5Zm5.8-7.8c-.3-.2-1.8-.9-2.1-1s-.5-.2-.7.2-.8 1-.9 1.2-.3.2-.6.1a8.6 8.6 0 0 1-2.5-1.5 9.5 9.5 0 0 1-1.7-2.1c-.2-.4 0-.5.2-.7l.5-.6c.2-.2.2-.3.3-.6s0-.4-.1-.6c-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4s-1.2 1.2-1.2 2.9 1.2 3.4 1.4 3.6c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.5 1.9.6.8.3 1.6.2 2.2.1.7-.1 1.8-.7 2.1-1.4.3-.7.3-1.3.2-1.4s-.3-.2-.6-.4Z"/></svg></a>
       </div>
     </footer>
@@ -416,7 +421,6 @@
         }
       });
     </script>
-    <script src="https://pl31299573.profitableratecpmnetwork.com/3f/64/44/3f64449ab897c9caa09f9c3133f748f9.js"></script>
     <script src="visit-tracker.js"></script>
     <script src="language.js"></script>
   </body>

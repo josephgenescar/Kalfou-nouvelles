@@ -19,6 +19,8 @@ const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_LIST_ID = process.env.BREVO_LIST_ID;
 const CONTACT_NOTIFICATION_EMAIL = process.env.CONTACT_NOTIFICATION_EMAIL;
 const BREVO_SENDER_EMAIL = process.env.BREVO_SENDER_EMAIL;
+const PUBLICITY_PLACEMENTS = ['home_top', 'home_sidebar', 'home_between_sections', 'article_top', 'article_middle', 'article_sidebar', 'footer_banner'];
+const PUBLICITY_PLANS = ['basic', 'premium', 'elite'];
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
@@ -224,8 +226,43 @@ function mapContact(row) {
   return { ...row, createdAt: row.created_at };
 }
 
+function normalizePlacement(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return PUBLICITY_PLACEMENTS.includes(normalized) ? normalized : 'home_sidebar';
+}
+
+function normalizePlan(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return PUBLICITY_PLANS.includes(normalized) ? normalized : 'basic';
+}
+
+function isPublicityActive(item) {
+  if (String(item.status || 'pending') !== 'published') return false;
+  const startValue = item.starts_at || item.startsAt || item.start_date || item.startDate;
+  const endValue = item.ends_at || item.endsAt || item.end_date || item.endDate;
+  const now = Date.now();
+  if (startValue) {
+    const start = new Date(startValue).getTime();
+    if (!Number.isNaN(start) && start > now) return false;
+  }
+  if (endValue) {
+    const end = new Date(endValue).getTime();
+    if (!Number.isNaN(end) && end < now) return false;
+  }
+  return true;
+}
+
 function mapPublicity(row) {
-  return { ...row, companyName: row.company_name, websiteUrl: row.website_url || '', createdAt: row.created_at };
+  return {
+    ...row,
+    companyName: row.company_name,
+    websiteUrl: row.website_url || '',
+    placement: normalizePlacement(row.placement),
+    plan: normalizePlan(row.plan),
+    startsAt: row.starts_at || row.startsAt || null,
+    endsAt: row.ends_at || row.endsAt || null,
+    createdAt: row.created_at
+  };
 }
 
 function handleServerError(res, error) {
@@ -357,18 +394,38 @@ app.post('/api/admin/articles', async (req, res) => {
 });
 
 app.post('/api/publicity', upload.single('image'), async (req, res) => {
-  const { companyName, company, email, websiteUrl, type, message } = req.body || {};
+  const { companyName, company, email, websiteUrl, type, message, placement, plan, startsAt, endsAt } = req.body || {};
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Veuillez remplir tous les champs.' });
   if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
+  const validPlacement = normalizePlacement(placement);
+  const validPlan = normalizePlan(plan);
+  const startDate = startsAt ? new Date(startsAt) : null;
+  const endDate = endsAt ? new Date(endsAt) : null;
+  if (startsAt && Number.isNaN(startDate.getTime())) return res.status(400).json({ ok: false, message: 'La date de début est invalide.' });
+  if (endsAt && Number.isNaN(endDate.getTime())) return res.status(400).json({ ok: false, message: 'La date de fin est invalide.' });
+  if (startDate && endDate && endDate < startDate) return res.status(400).json({ ok: false, message: 'La date de fin doit être après la date de début.' });
   if (!requireSupabase(res)) return;
   try {
     const imageUrl = req.file ? await uploadImage(req.file, SUPABASE_STORAGE_BUCKET) : null;
     await supabaseRequest('publicity', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), website_url: websiteUrl ? String(websiteUrl).trim() : null, type: String(type).trim(), message: String(message).trim(), image_url: imageUrl, status: 'pending' })
+      body: JSON.stringify({
+        company_name: String(companyName).trim(),
+        company: String(company).trim(),
+        email: String(email).trim(),
+        website_url: websiteUrl ? String(websiteUrl).trim() : null,
+        type: String(type).trim(),
+        message: String(message).trim(),
+        image_url: imageUrl,
+        placement: validPlacement,
+        plan: validPlan,
+        starts_at: startsAt || null,
+        ends_at: endsAt || null,
+        status: 'pending'
+      })
     });
-    await sendAdminNotification(`Nouvo demann piblisite: ${String(companyName).trim()}`, `Entreprise: ${String(company).trim()}\nE-mail: ${String(email).trim()}\nTip: ${String(type).trim()}\n\n${String(message).trim()}`);
+    await sendAdminNotification(`Nouvo demann piblisite: ${String(companyName).trim()}`, `Entreprise: ${String(company).trim()}\nE-mail: ${String(email).trim()}\nTip: ${String(type).trim()}\nPlasman: ${validPlacement}\nPlan: ${validPlan}\n\n${String(message).trim()}`);
     res.status(201).json({ ok: true, message: 'Demande de publicité enregistrée.' });
   } catch (error) { handleServerError(res, error); }
 });
@@ -410,8 +467,9 @@ app.post('/api/newsletter', async (req, res) => {
 app.get('/api/public/publicity', async (req, res) => {
   if (!requireSupabase(res)) return;
   try {
-    const rows = await supabaseRequest('publicity?select=*&status=eq.published&order=created_at.desc');
-    res.json({ ok: true, publicity: rows.map(mapPublicity) });
+    const rows = await supabaseRequest('publicity?select=*&order=created_at.desc');
+    const active = rows.filter(isPublicityActive).map(mapPublicity);
+    res.json({ ok: true, publicity: active });
   } catch (error) { handleServerError(res, error); }
 });
 
@@ -540,16 +598,34 @@ app.post('/api/admin/publicity/:id/status', async (req, res) => {
 });
 
 app.post('/api/admin/publicity/:id/update', async (req, res) => {
-  const { password, companyName, company, email, websiteUrl, type, message } = req.body || {};
+  const { password, companyName, company, email, websiteUrl, type, message, placement, plan, startsAt, endsAt } = req.body || {};
   if (!validatePassword(password)) return res.status(401).json({ ok: false, message: 'Accès refusé.' });
   if (!companyName || !company || !email || !type || !message) return res.status(400).json({ ok: false, message: 'Tous les champs sont requis.' });
   if (websiteUrl && !/^https?:\/\/\S+$/i.test(String(websiteUrl).trim())) return res.status(400).json({ ok: false, message: 'Le lien du site doit commencer par http:// ou https://.' });
+  const validPlacement = normalizePlacement(placement);
+  const validPlan = normalizePlan(plan);
+  const startDate = startsAt ? new Date(startsAt) : null;
+  const endDate = endsAt ? new Date(endsAt) : null;
+  if (startsAt && Number.isNaN(startDate.getTime())) return res.status(400).json({ ok: false, message: 'La date de début est invalide.' });
+  if (endsAt && Number.isNaN(endDate.getTime())) return res.status(400).json({ ok: false, message: 'La date de fin est invalide.' });
+  if (startDate && endDate && endDate < startDate) return res.status(400).json({ ok: false, message: 'La date de fin doit être après la date de début.' });
   if (!requireSupabase(res)) return;
   try {
     const rows = await supabaseRequest(`publicity?id=eq.${encodeURIComponent(req.params.id)}`, {
       method: 'PATCH',
       headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({ company_name: String(companyName).trim(), company: String(company).trim(), email: String(email).trim(), website_url: websiteUrl ? String(websiteUrl).trim() : null, type: String(type).trim(), message: String(message).trim() })
+      body: JSON.stringify({
+        company_name: String(companyName).trim(),
+        company: String(company).trim(),
+        email: String(email).trim(),
+        website_url: websiteUrl ? String(websiteUrl).trim() : null,
+        type: String(type).trim(),
+        message: String(message).trim(),
+        placement: validPlacement,
+        plan: validPlan,
+        starts_at: startsAt || null,
+        ends_at: endsAt || null
+      })
     });
     if (!rows.length) return res.status(404).json({ ok: false, message: 'Demande introuvable.' });
     res.json({ ok: true, publicity: mapPublicity(rows[0]), message: 'Demande modifiée avec succès.' });

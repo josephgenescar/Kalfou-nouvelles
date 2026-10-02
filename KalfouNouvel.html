@@ -1232,6 +1232,7 @@
 
     <main>
       <div class="container">
+        <div id="homeTopAd" class="local-ad-slot" aria-label="Publicité client"></div>
         <section class="hero">
           <article class="hero-feature">
             <div class="hero-image"></div>
@@ -1245,6 +1246,7 @@
           </article>
 
           <aside class="side-column">
+            <div id="homeSidebarAd" class="local-ad-slot" aria-label="Publicité client"></div>
             <h3 class="small-heading" data-i18n="more_news">Plus d’articles</h3>
 
             <div class="side-item">
@@ -1428,6 +1430,8 @@
                data-full-width-responsive="true"></ins>
         </section>
 
+        <div id="homeBetweenAd" class="local-ad-slot" aria-label="Publicité client"></div>
+
         <section class="newsletter" id="newsletterSignup">
           <div>
             <h3 data-i18n="newsletter_title">Inscrivez-vous à notre newsletter</h3>
@@ -1443,6 +1447,7 @@
           <span class="newsletter-indicator-copy"><strong>Ne manquez aucune actualité</strong>Recevez nos nouveaux articles par e-mail.</span>
           <a class="newsletter-indicator-link" href="#newsletterSignup">S’inscrire</a>
         </div>
+        <div id="footerBannerAd" class="local-ad-slot" aria-label="Publicité client"></div>
       </div>
       <section id="publicityLive" class="publicity-live" aria-label="Publicité">
         <div id="publicitySlides" class="publicity-slides"></div>
@@ -1753,12 +1758,97 @@
         applySearch(event.target.value);
       });
 
+      function renderLocalAdCard(campaign, slotId) {
+        const slot = document.getElementById(slotId);
+        if (!slot || !campaign) return;
+
+        const adLink = document.createElement('a');
+        adLink.href = campaign.websiteUrl || '#';
+        adLink.target = campaign.websiteUrl ? '_blank' : '_self';
+        adLink.rel = campaign.websiteUrl ? 'noopener noreferrer sponsored' : '';
+        adLink.className = 'local-ad-card';
+        adLink.style.display = 'block';
+        adLink.style.margin = '18px 0';
+        adLink.style.border = '1px solid #e8e1d8';
+        adLink.style.borderRadius = '12px';
+        adLink.style.background = '#fff';
+        adLink.style.padding = '14px';
+
+        const label = document.createElement('div');
+        label.textContent = 'Publicité client';
+        label.style.fontSize = '11px';
+        label.style.textTransform = 'uppercase';
+        label.style.letterSpacing = '0.14em';
+        label.style.color = '#5f5f5f';
+        label.style.marginBottom = '10px';
+
+        const body = document.createElement('div');
+        body.style.display = 'flex';
+        body.style.gap = '14px';
+        body.style.alignItems = 'center';
+
+        if (campaign.image_url || campaign.imageUrl) {
+          const image = document.createElement('img');
+          const imageUrl = campaign.image_url || campaign.imageUrl;
+          image.src = imageUrl;
+          image.alt = `${campaign.company || 'Publicité'} partner`;
+          image.style.width = '130px';
+          image.style.height = '90px';
+          image.style.objectFit = 'cover';
+          image.style.borderRadius = '8px';
+          body.appendChild(image);
+        }
+
+        const info = document.createElement('div');
+        info.style.flex = '1';
+        const tag = document.createElement('strong');
+        tag.textContent = (campaign.plan || 'premium').toUpperCase();
+        tag.style.display = 'block';
+        tag.style.fontSize = '11px';
+        tag.style.letterSpacing = '0.1em';
+        tag.style.color = '#d82b2b';
+        tag.style.marginBottom = '6px';
+
+        const title = document.createElement('h3');
+        title.textContent = campaign.company || 'Notre partenaire';
+        title.style.margin = '0 0 6px';
+        title.style.fontSize = 'clamp(20px, 1.5vw, 28px)';
+
+        const text = document.createElement('p');
+        text.textContent = campaign.message || 'Votre marque ici';
+        text.style.margin = '0';
+        text.style.color = '#333';
+
+        info.append(tag, title, text);
+        body.appendChild(info);
+        adLink.append(label, body);
+        slot.innerHTML = '';
+        slot.appendChild(adLink);
+      }
+
+      function renderPlacementAds(campaigns) {
+        if (!Array.isArray(campaigns) || !campaigns.length) return;
+        const placementMap = {
+          home_top: 'homeTopAd',
+          home_sidebar: 'homeSidebarAd',
+          home_between_sections: 'homeBetweenAd',
+          footer_banner: 'footerBannerAd'
+        };
+
+        Object.entries(placementMap).forEach(([placement, slotId]) => {
+          const card = campaigns.find((campaign) => (campaign.placement || 'home_sidebar') === placement);
+          if (card) renderLocalAdCard(card, slotId);
+        });
+      }
+
       async function loadPublishedPublicity() {
         try {
           const response = await fetch('/api/public/publicity');
           if (!response.ok) return;
           const result = await response.json();
           const campaigns = Array.isArray(result.publicity) ? result.publicity : [];
+          renderPlacementAds(campaigns);
+
           const section = document.getElementById('publicityLive');
           const slides = document.getElementById('publicitySlides');
           if (!section || !slides || !campaigns.length) return;

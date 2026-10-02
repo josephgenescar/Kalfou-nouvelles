@@ -382,6 +382,8 @@
                 <th>E-mail</th>
                 <th>Type</th>
                 <th>Message</th>
+                <th>Placement</th>
+                <th>Plan</th>
                 <th>Date</th>
                 <th>Action</th>
               </tr>
@@ -585,6 +587,8 @@
             <td>${escapeHtml(item.email)}</td>
             <td>${escapeHtml(item.type)}</td>
             <td>${escapeHtml(item.message)}</td>
+            <td>${escapeHtml(item.placement || 'home_sidebar')}</td>
+            <td>${escapeHtml(item.plan || 'basic')}</td>
             <td>${escapeHtml(formatDate(item.createdAt))}</td>
               <td>
                 ${item.image_url ? `<a href="${escapeHtml(item.image_url)}" target="_blank" rel="noopener"><img class="publicity-preview" src="${escapeHtml(item.image_url)}" alt="Image de la publicité" /></a>` : '<span class="empty">Sans image</span>'}
@@ -597,6 +601,14 @@
                   <select data-edit-field="type">
                     ${['Banner', 'Article sponsorisé', 'Newsletter', 'Partenariat global'].map((type) => `<option ${item.type === type ? 'selected' : ''}>${type}</option>`).join('')}
                   </select>
+                  <select data-edit-field="placement">
+                    ${['home_top', 'home_sidebar', 'home_between_sections', 'article_top', 'article_middle', 'article_sidebar', 'footer_banner'].map((placement) => `<option value="${placement}" ${item.placement === placement ? 'selected' : ''}>${placement}</option>`).join('')}
+                  </select>
+                  <select data-edit-field="plan">
+                    ${['basic', 'premium', 'elite'].map((plan) => `<option value="${plan}" ${item.plan === plan ? 'selected' : ''}>${plan}</option>`).join('')}
+                  </select>
+                  <input data-edit-field="startsAt" type="date" value="${item.startsAt ? item.startsAt.slice(0, 10) : ''}" placeholder="Début" />
+                  <input data-edit-field="endsAt" type="date" value="${item.endsAt ? item.endsAt.slice(0, 10) : ''}" placeholder="Fin" />
                   <textarea data-edit-field="message" rows="4" placeholder="Message">${escapeHtml(item.message)}</textarea>
                   <button class="mini-btn primary" data-action="save-publicity" data-id="${item.id}">Enregistrer</button>
                 </div>
